@@ -1,19 +1,20 @@
 {
-  "name": "Darul Hadis Pro",
-  "short_name": "Darul Hadis",
-  "start_url": "/dh-shishan/",
-  "scope": "/dh-shishan/",
+  "name": "Rawdat At-Tullab",
+  "short_name": "Rawdat",
+  "start_url": "/Rawdat-At-Tullab/",
+  "scope": "/Rawdat-At-Tullab/",
   "display": "standalone",
-  "background_color": "#ffffff",
-  "theme_color": "#1a7f37",
+  "orientation": "portrait",
+  "background_color": "#F5F5F0",
+  "theme_color": "#0F8556",
   "icons": [
     {
-      "src": "icons/D52461AB-D6BA-45EF-A283-9BF2C9ACC69E.png",
-      "sizes": "180x180",
+      "src": "icons/icon-192.png",
+      "sizes": "192x192",
       "type": "image/png"
     },
     {
-      "src": "icons/774E76AB-7EB5-44D9-86C3-209F3E1859E4.png",
+      "src": "icons/icon-512.png",
       "sizes": "512x512",
       "type": "image/png"
     }
