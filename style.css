@@ -1081,4 +1081,13 @@ html[data-theme="dark"] .ico-brand { background: var(--brand-100); color: var(--
 #s-lesson.hidden, #s-dua.hidden {
   display: none !important;
 }
+.tile-cover {
+  width: 100%;
+  height: 96px;
+  object-fit: cover;
+  border-radius: 12px;
+  margin-bottom: 10px;
+  border: 1px solid var(--border);
+}
+
 
