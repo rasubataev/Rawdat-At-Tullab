@@ -1071,3 +1071,14 @@ html[data-theme="dark"] .ico-brand { background: var(--brand-100); color: var(--
   .tile-grid { grid-template-columns: repeat(4, 1fr); }
   .sheet { max-width: 960px; }
 }
+/* Экраны урока и дуа — вне .app, выравниваем как остальные */
+#s-lesson, #s-dua {
+  max-width: 430px;
+  margin: 0 auto;
+  min-height: 100dvh;
+  background: var(--bg);
+}
+#s-lesson.hidden, #s-dua.hidden {
+  display: none !important;
+}
+
