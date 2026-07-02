@@ -3898,11 +3898,12 @@ const BOOKS = [
     ]
   },
 
-  { id: 'bina', ar: 'البِنَاء', title: 'Аль-Бина', locked: true, parts: [] },
+  { id: 'bina', ar: 'البِنَاء', title: 'Аль-Бина',cover: 'icons/bina.jpg', locked: true, parts: [] },
 {
   id: 'ajur',
   ar: 'الآجرومية',
   title: 'Аль-Аджрумия',
+   cover: 'icons/ajur.jpg',
   available: true,
   parts: [
     {
@@ -4089,7 +4090,8 @@ locked: false,
     }
   ]
 },
-    { id: 'nav40', ar: 'الأربعون النووية', title: '40 хадисов ан-Навави', locked: true, parts: [] },
+    { id: 'nav40', ar: 'الأربعون النووية', title: '40 хадисов ан-Навави',cover:
+'icons/nav40.jpg', locked: true, parts: [] },
   {
     id: 'dua-student',
     ar: 'دعاء طالب العلم',
