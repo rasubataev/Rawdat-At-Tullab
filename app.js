@@ -4526,9 +4526,8 @@ function renderHome() {
     return `
       <button type="button" class="tile ${locked ? 'locked' : ''}" data-act="open-book" data-book="${b.id}">
         ${locked ? `<span class="lock-badge"><svg viewBox="0 0 24 24"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg></span>` : ''}
-        <div class="tile-icon ico-brand">
-          <svg viewBox="0 0 24 24"><path d="M4 5a2 2 0 0 1 2-2h12v18H6a2 2 0 0 1-2-2zM8 3v18"/></svg>
-        </div>
+  ${b.cover ? `<img src="${b.cover}" alt="" class="tile-cover">` : `<div class="tile-icon ico-brand"><svg viewBox="0 0 24 24"><path d="M4 5a2 2 0 0 1 2-2h12v18H6a2 2 0 0 1-2-2zM8 3v18"/></svg></div>`}
+
         <div style="direction:rtl;font-family:var(--font-ar);font-size:18px;font-weight:700;line-height:1.2">${esc(b.ar)}</div>
         <div class="tile-sub">${esc(b.title)}</div>
         ${!locked ? `
