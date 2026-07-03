@@ -81,6 +81,7 @@
   --font-ui: "Tajawal", -apple-system, BlinkMacSystemFont, "SF Pro Text", system-ui, sans-serif;
   --font-display: "Tajawal", -apple-system, BlinkMacSystemFont, "SF Pro Display", system-ui, sans-serif;
   --font-ar: "Tajawal", "SF Arabic", "Noto Naskh Arabic", "Amiri", serif;
+  --font-ar-classic: "SF Arabic", "Geeza Pro", "Noto Naskh Arabic", "Amiri", serif;
   --font-mono: "SF Mono", "Fira Code", monospace;
 
   /* Safe areas */
@@ -486,6 +487,17 @@ html[data-theme="dark"] .tile .tile-icon { border-color: rgba(255,255,255,0.06);
 .tile .tile-title { font-weight: 700; font-size: 14px; line-height: 1.3; margin-bottom: 3px; letter-spacing: -0.01em; }
 .tile .tile-sub { font-size: 11.5px; color: var(--text-3); }
 
+/* Обложки книг */
+.tile-cover {
+  width: 100%;
+  aspect-ratio: 3 / 4;
+  object-fit: cover;
+  border-radius: 14px 14px 0 0;
+  margin: -16px -15px 12px -15px;
+  border: 0;
+  display: block;
+}
+
 /* ============================================================
    PROGRESS
    ============================================================ */
@@ -613,7 +625,7 @@ html[data-theme="dark"] .tile .tile-icon { border-color: rgba(255,255,255,0.06);
   background: var(--surface);
   box-shadow: 0 0 0 3px color-mix(in srgb, var(--brand-500) 15%, transparent);
 }
-.input.ar, .textarea.ar { direction: rtl; text-align: right; font-family: var(--font-ar); font-size: 22px; }
+.input.ar, .textarea.ar { direction: rtl; text-align: right; font-family: var(--font-ar-classic); font-size: 22px; }
 
 .search-wrap {
   display: flex; align-items: center; gap: 10px;
@@ -635,7 +647,7 @@ html[data-theme="dark"] .tile .tile-icon { border-color: rgba(255,255,255,0.06);
 .search-wrap input::placeholder { color: var(--muted); }
 
 /* ============================================================
-   WORD ROW
+   WORD ROW — SF Arabic (классический)
    ============================================================ */
 .word-row {
   display: flex; align-items: center; gap: 10px;
@@ -651,7 +663,7 @@ html[data-theme="dark"] .tile .tile-icon { border-color: rgba(255,255,255,0.06);
   background: var(--border);
 }
 .word-row .wr-ar {
-  font-family: var(--font-ar);
+  font-family: var(--font-ar-classic);
   direction: rtl;
   font-size: 20px;
   font-weight: 600;
@@ -669,7 +681,7 @@ html[data-theme="dark"] .tile .tile-icon { border-color: rgba(255,255,255,0.06);
 .word-row .wr-fav.on svg { fill: currentColor; }
 
 /* ============================================================
-   FLASHCARD (STUDY)
+   FLASHCARD (STUDY) — SF Arabic (классический)
    ============================================================ */
 .study-header { display: flex; align-items: center; gap: 12px; padding: 0 18px 14px; }
 .study-header .progress { flex: 1; }
@@ -711,7 +723,7 @@ html[data-theme="dark"] .flashcard::after { background: linear-gradient(90deg, t
   border: 1px solid color-mix(in srgb, var(--brand-500) 20%, transparent);
 }
 .fc-arabic {
-  font-family: var(--font-ar);
+  font-family: var(--font-ar-classic);
   direction: rtl;
   font-size: clamp(40px, 11vw, 60px);
   font-weight: 700;
@@ -976,10 +988,10 @@ html[data-theme="dark"] .ico-brand { background: var(--brand-100); color: var(--
 :focus-visible { outline: 2px solid var(--brand-500); outline-offset: 2px; }
 
 /* ============================================================
-   LESSON SCREEN
+   LESSON SCREEN — SF Arabic (классический)
    ============================================================ */
 .lesson-arabic-text {
-  font-family: var(--font-ar);
+  font-family: var(--font-ar-classic);
   direction: rtl;
   font-size: 22px;
   font-weight: 600;
@@ -999,14 +1011,14 @@ html[data-theme="dark"] .ico-brand { background: var(--brand-100); color: var(--
 .lesson-cards-row { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; margin-bottom: 14px; }
 .lesson-card { background: var(--surface); border-radius: var(--r-xl); padding: 16px 10px; text-align: center; box-shadow: var(--s-card); border: 1px solid var(--border); }
 .lesson-card-num { width: 28px; height: 28px; border-radius: 50%; display: grid; place-items: center; font-size: 12px; font-weight: 800; margin: 0 auto 10px; color: #fff; }
-.lesson-card-ar { font-family: var(--font-ar); direction: rtl; font-size: 22px; font-weight: 700; color: var(--text); margin-bottom: 5px; }
+.lesson-card-ar { font-family: var(--font-ar-classic); direction: rtl; font-size: 22px; font-weight: 700; color: var(--text); margin-bottom: 5px; }
 .lesson-card-label { font-size: 10.5px; color: var(--text-3); font-weight: 600; line-height: 1.4; }
 .lesson-section { background: var(--surface); border-radius: var(--r-xl); padding: 16px; margin-bottom: 10px; box-shadow: var(--s-card); border: 1px solid var(--border); }
 .lesson-section-title { font-size: 14px; font-weight: 700; color: var(--brand-600); margin-bottom: 10px; }
 .lesson-bullet { display: flex; align-items: flex-start; gap: 9px; font-size: 13.5px; color: var(--text-2); margin-bottom: 7px; line-height: 1.55; }
 .lesson-bullet::before { content: "•"; color: var(--brand-500); font-size: 16px; flex-shrink: 0; margin-top: -1px; }
 .lesson-example { background: var(--surface-2); border-radius: var(--r-md); padding: 12px 14px; margin-top: 10px; border: 1px solid var(--border); }
-.lesson-example .ex-ar { font-family: var(--font-ar); direction: rtl; font-size: 18px; font-weight: 600; color: var(--brand-600); }
+.lesson-example .ex-ar { font-family: var(--font-ar-classic); direction: rtl; font-size: 18px; font-weight: 600; color: var(--brand-600); }
 .lesson-tip { background: color-mix(in srgb, var(--warn) 8%, transparent); border: 1px solid color-mix(in srgb, var(--warn) 18%, transparent); border-radius: var(--r-xl); padding: 16px; margin-bottom: 16px; display: flex; gap: 12px; align-items: flex-start; }
 .lesson-tip-icon { font-size: 20px; flex-shrink: 0; }
 .lesson-tip-text { font-size: 13.5px; color: var(--text-2); line-height: 1.55; }
@@ -1020,14 +1032,7 @@ html[data-theme="dark"] .ico-brand { background: var(--brand-100); color: var(--
   .rate-btn { min-height: 56px; }
   .fc-arabic { font-size: 36px; }
 }
-.tile-cover {
-  width: 100%;
-  height: 96px;
-  object-fit: cover;
-  border-radius: 12px;
-  margin-bottom: 10px;
-  border: 1px solid var(--border);
-}
+
 /* ============================================================
    ПЛАНШЕТ И НОУТБУК
    ============================================================ */
@@ -1037,8 +1042,6 @@ html[data-theme="dark"] .ico-brand { background: var(--brand-100); color: var(--
     padding-bottom: 24px;
     padding-left: 88px;
   }
-
-  /* Нижнее меню -> боковое слева */
   .bottom-nav {
     left: 0; right: auto; top: 0; bottom: 0;
     width: 88px;
@@ -1057,11 +1060,7 @@ html[data-theme="dark"] .ico-brand { background: var(--brand-100); color: var(--
   }
   .nav-btn { padding: 12px 4px; }
   .nav-btn.active::after { display: none; }
-
-  /* Карточки-плитки: 3 в ряд вместо 2 */
   .tile-grid { grid-template-columns: 1fr 1fr 1fr; }
-
-  /* Модалка и тост по центру, а не на всю ширину */
   .sheet, .toast { max-width: 720px; margin-left: auto; margin-right: auto; }
   .sheet { left: 88px; }
 }
@@ -1070,24 +1069,4 @@ html[data-theme="dark"] .ico-brand { background: var(--brand-100); color: var(--
   .app { max-width: 960px; }
   .tile-grid { grid-template-columns: repeat(4, 1fr); }
   .sheet { max-width: 960px; }
-}
-/* Экраны урока и дуа — вне .app, выравниваем как остальные */
-#s-lesson, #s-dua {
-  max-width: 430px;
-  margin: 0 auto;
-  min-height: 100dvh;
-  background: var(--bg);
-}
-#s-lesson.hidden, #s-dua.hidden {
-  display: none !important;
-}
-.tile-cover {
-  width: 100%;
-  aspect-ratio: 3 / 4;
-  object-fit: cover;
-  border-radius: 12px;
-  margin-bottom: 10px;
-  border: 1px solid var(--border);
-  background: var(--surface-2);
-  display: block;
 }
