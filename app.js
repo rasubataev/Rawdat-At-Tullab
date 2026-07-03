@@ -3898,7 +3898,7 @@ const BOOKS = [
     ]
   },
 
-  { id: 'bina', ar: 'البِنَاء', title: 'Аль-Бина',cover: 'icons/bina.jpg', locked: true, parts: [] },
+  { id: 'bina', ar: 'البِنَاء', title: 'Аль-Бина',cover: 'icons/bina.PNG', locked: true, parts: [] },
 {
   id: 'ajur',
   ar: 'الآجرومية',
