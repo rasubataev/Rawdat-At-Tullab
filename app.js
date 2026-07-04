@@ -4551,7 +4551,10 @@ function renderHome() {
 
   // Library tiles
   const g = $('#home-library');
-  g.innerHTML = BOOKS.slice(0, 6).map(b => {
+const _recent = (STATE.recentBooks || []).map(id => findBook(id)).filter(Boolean);
+const _display = _recent.length ? _recent : BOOKS.slice(0, 4);
+g.innerHTML = _display.map(b => {
+
     const locked = !!b.locked;
     const units = (b.parts || []).flatMap(p => p.units || []);
     const totalW = units.reduce((s, u) => s + (u.words?.length || 0), 0);
@@ -4602,17 +4605,28 @@ function renderLearn() {
 
 /* BOOKS */
 function renderBooks() {
-  $('#books-list').innerHTML = BOOKS.map(b => {
+  $('#books-list').innerHTML = `<div class="tile-grid" style="margin:12px 16px">` +
+  BOOKS.map(b => {
     const locked = !!b.locked;
+    const units = (b.parts || []).flatMap(p => p.units || []);
+    const totalW = units.reduce((s, u) => s + (u.words?.length || 0), 0);
+    const learnedW = units.flatMap(u => u.words || []).filter(w => STATE.cards[keyOf(w[0])]?.flags?.learned).length;
+    const pct = totalW ? Math.round(learnedW / totalW * 100) : 0;
     return `
-      <button type="button" class="list-item ${locked ? 'locked' : ''}" data-act="open-book" data-book="${b.id}">
-        <div class="li-icon ico-brand" style="font-family:var(--font-ar);font-size:14px;font-weight:700;direction:rtl">${esc(b.ar.slice(0,3))}</div>
-        <div class="li-body"><div class="li-title">${esc(b.title)}</div><div class="li-sub">${locked ? 'Скоро' : 'Открыть'}</div></div>
-        <div class="li-trail">${locked ? `<svg viewBox="0 0 24 24"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg>` : `<svg viewBox="0 0 24 24"><path d="M9 6l6 6-6 6"/></svg>`}</div>
+      <button type="button" class="tile ${locked ? 'locked' : ''}" data-act="open-book" data-book="${b.id}">
+        ${locked ? `<span class="lock-badge"><svg viewBox="0 0 24 24"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg></span>` : ''}
+        ${b.cover ? `<img src="${b.cover}" alt="" class="tile-cover">` : `<div class="tile-icon ico-brand"><svg viewBox="0 0 24 24"><path d="M4 5a2 2 0 0 1 2-2h12v18H6a2 2 0 0 1-2-2zM8 3v18"/></svg></div>`}
+        <div style="direction:rtl;font-family:var(--font-ar);font-size:18px;font-weight:700;line-height:1.2">${esc(b.ar)}</div>
+        <div class="tile-sub">${esc(b.title)}</div>
+        ${b.id === 'byy' ? `
+          <div class="progress thin" style="margin-top:6px"><i style="width:${pct}%"></i></div>
+          <div class="tiny" style="margin-top:4px">${learnedW}/${totalW} · ${pct}%</div>
+        ` : locked ? `<div class="tiny" style="margin-top:4px;color:var(--text-3)">Скоро</div>` : ''}
       </button>
     `;
-  }).join('');
+  }).join('') + `</div>`;
 }
+
 
 let BOOK_ID = null, PART_ID = null, UNIT_ID = null;
 
@@ -4620,10 +4634,13 @@ function openBook(id) {
   const b = findBook(id);
   if (!b || b.locked) { toast('Скоро будет доступна'); return; }
   if (b.isDua) { navigate('s-dua'); return; }
+  if (!STATE.recentBooks) STATE.recentBooks = [];
+  STATE.recentBooks = [id, ...STATE.recentBooks.filter(r => r !== id)].slice(0, 4);
+  saveState();
   BOOK_ID = id;
-
   navigate('s-parts');
 }
+
 
 function renderParts() {
   const b = findBook(BOOK_ID); if (!b) return;
