@@ -4133,13 +4133,13 @@ locked: true,
 },
 {
   id: 'fikh',
-  ar: 'مَتْنُ غَايَةِ التَّقْرِيب',
+  ar:'تيسير غاية التقريب',
   title: 'Матн Гаят ат-Такриб',
   cover: 'icons/fikh.PNG',
    locked: true,
   available: true,
   parts: [
-    { id: 'fikh-p0', num: 0, title: 'نبذة عن الكتاب', locked: true, units: [] },
+    { id: 'fikh-p0', num: 0, title: 'نبذت عن المألف', locked: true, units: [] },
     { id: 'fikh-p1', num: 1, title: 'كتاب الطهارة', locked: true, units: [
       { id: 'fikh-p1-u1', num: 1, name: 'المياه', locked: true, words: [] },
       { id: 'fikh-p1-u2', num: 2, name: 'الوضوء', locked: true, words: [] },
