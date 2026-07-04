@@ -4131,6 +4131,54 @@ locked: true,
     { id: 'taj-p12', num: 12, title: 'الإظهار في التجويد',           locked: true, units: [] },
   ]
 },
+{
+  id: 'fikh',
+  ar: 'مَتْنُ غَايَةِ التَّقْرِيب',
+  title: 'Матн Гаят ат-Такриб',
+  cover: 'icons/fikh.PNG',
+   locked: true,
+  available: true,
+  parts: [
+    { id: 'fikh-p0', num: 0, title: 'نبذة عن الكتاب', locked: true, units: [] },
+    { id: 'fikh-p1', num: 1, title: 'كتاب الطهارة', locked: true, units: [
+      { id: 'fikh-p1-u1', num: 1, name: 'المياه', locked: true, words: [] },
+      { id: 'fikh-p1-u2', num: 2, name: 'الوضوء', locked: true, words: [] },
+      { id: 'fikh-p1-u3', num: 3, name: 'الغسل', locked: true, words: [] },
+      { id: 'fikh-p1-u4', num: 4, name: 'التيمم', locked: true, words: [] },
+      { id: 'fikh-p1-u5', num: 5, name: 'النجاسات', locked: true, words: [] },
+      { id: 'fikh-p1-u6', num: 6, name: 'الحيض', locked: true, words: [] },
+    ]},
+    { id: 'fikh-p2', num: 2, title: 'كتاب الصلاة', locked: true, units: [
+      { id: 'fikh-p2-u1', num: 1, name: 'أوقات الصلاة', locked: true, words: [] },
+      { id: 'fikh-p2-u2', num: 2, name: 'شروط الصلاة', locked: true, words: [] },
+      { id: 'fikh-p2-u3', num: 3, name: 'أركان الصلاة', locked: true, words: [] },
+      { id: 'fikh-p2-u4', num: 4, name: 'سنن الصلاة', locked: true, words: [] },
+      { id: 'fikh-p2-u5', num: 5, name: 'مبطلات الصلاة', locked: true, words: [] },
+      { id: 'fikh-p2-u6', num: 6, name: 'صلاة الجماعة', locked: true, words: [] },
+      { id: 'fikh-p2-u7', num: 7, name: 'صلاة المسافر', locked: true, words: [] },
+      { id: 'fikh-p2-u8', num: 8, name: 'صلاة الجمعة', locked: true, words: [] },
+    ]},
+    { id: 'fikh-p3', num: 3, title: 'كتاب الزكاة', locked: true, units: [
+      { id: 'fikh-p3-u1', num: 1, name: 'زكاة الأموال', locked: true, words: [] },
+      { id: 'fikh-p3-u2', num: 2, name: 'زكاة الزروع', locked: true, words: [] },
+      { id: 'fikh-p3-u3', num: 3, name: 'زكاة الفطر', locked: true, words: [] },
+      { id: 'fikh-p3-u4', num: 4, name: 'أهل الزكاة', locked: true, words: [] },
+    ]},
+    { id: 'fikh-p4', num: 4, title: 'كتاب الصيام', locked: true, units: [
+      { id: 'fikh-p4-u1', num: 1, name: 'شروط الصيام', locked: true, words: [] },
+      { id: 'fikh-p4-u2', num: 2, name: 'أركان الصيام', locked: true, words: [] },
+      { id: 'fikh-p4-u3', num: 3, name: 'مفطرات الصيام', locked: true, words: [] },
+      { id: 'fikh-p4-u4', num: 4, name: 'قضاء الصيام', locked: true, words: [] },
+    ]},
+    { id: 'fikh-p5', num: 5, title: 'كتاب الحج', locked: true, units: [
+      { id: 'fikh-p5-u1', num: 1, name: 'شروط الحج', locked: true, words: [] },
+      { id: 'fikh-p5-u2', num: 2, name: 'أركان الحج', locked: true, words: [] },
+      { id: 'fikh-p5-u3', num: 3, name: 'واجبات الحج', locked: true, words: [] },
+      { id: 'fikh-p5-u4', num: 4, name: 'سنن الحج', locked: true, words: [] },
+      { id: 'fikh-p5-u5', num: 5, name: 'المحظورات', locked: true, words: [] },
+    ]},
+  ]
+},
 
 ];
 
