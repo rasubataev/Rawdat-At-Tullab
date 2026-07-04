@@ -4179,6 +4179,14 @@ locked: true,
     ]},
   ]
 },
+{
+  id: 'sira',
+  ar: 'نُورُ العُيُون',
+  title: 'Нуруль Уюн',
+  cover: 'icons/sira.png',
+  locked: true,
+  parts: []
+},
 
 ];
 
