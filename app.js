@@ -4110,10 +4110,11 @@ locked: false,
   },
 {
   id: 'taj',
-  ar: 'التَّجْوِيدُ ',
+  ar: 'التجويد ',
   title: 'Ат-Таджвид',
   cover: 'icons/taj.PNG',
-  available: false,
+locked: true,
+   available: true,
   parts: [
     { id: 'taj-p0',  num: 0,  title: 'نبذة عن الكتاب',              locked: true, units: [] },
     { id: 'taj-p1',  num: 1,  title: 'القراءات',                     locked: true, units: [] },
