@@ -4107,6 +4107,29 @@ locked: false,
     isDua: true,
     parts: []
   },
+{
+  id: 'taj',
+  ar: 'التَّجْوِيدُ ',
+  title: 'Ат-Таджвид',
+  cover: 'icons/taj.PNG',
+  available: true,
+  parts: [
+    { id: 'taj-p0',  num: 0,  title: 'نبذة عن الكتاب',              locked: true, units: [] },
+    { id: 'taj-p1',  num: 1,  title: 'القراءات',                     locked: true, units: [] },
+    { id: 'taj-p2',  num: 2,  title: 'أصول طريق الشاطبية',           locked: true, units: [] },
+    { id: 'taj-p3',  num: 3,  title: 'أحكام الاستعاذة والبسملة',     locked: true, units: [] },
+    { id: 'taj-p4',  num: 4,  title: 'المخارج',                      locked: true, units: [] },
+    { id: 'taj-p5',  num: 5,  title: 'الحركات',                      locked: true, units: [] },
+    { id: 'taj-p6',  num: 6,  title: 'الصفات',                       locked: true, units: [] },
+    { id: 'taj-p7',  num: 7,  title: 'أحكام النون الساكنة والتنوين', locked: true, units: [] },
+    { id: 'taj-p8',  num: 8,  title: 'أحكام الميم الساكنة',          locked: true, units: [] },
+    { id: 'taj-p9',  num: 9,  title: 'أحكام الراء',                  locked: true, units: [] },
+    { id: 'taj-p10', num: 10, title: 'المد',                         locked: true, units: [] },
+    { id: 'taj-p11', num: 11, title: 'الإدغام',                      locked: true, units: [] },
+    { id: 'taj-p12', num: 12, title: 'الإظهار في التجويد',           locked: true, units: [] },
+  ]
+},
+
 ];
 
 
