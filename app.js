@@ -4564,10 +4564,12 @@ function renderHome() {
 
         <div style="direction:rtl;font-family:var(--font-ar);font-size:18px;font-weight:700;line-height:1.2">${esc(b.ar)}</div>
         <div class="tile-sub">${esc(b.title)}</div>
-        ${!locked ? `
-          <div class="progress thin" style="margin-top:6px"><i style="width:${pct}%"></i></div>
-          <div class="tiny" style="margin-top:4px">${learnedW}/${totalW} · ${pct}%</div>
-        ` : `<div class="tiny" style="margin-top:4px;color:var(--text-3)">Скоро</div>`}
+        
+          ${!locked ? (b.id === 'byy' ? `
+  <div class="progress thin" style="margin-top:6px"><i style="width:${pct}%"></i></div>
+  <div class="tiny" style="margin-top:4px">${learnedW}/${totalW} · ${pct}%</div>
+` : '') : `<div class="tiny" style="margin-top:4px;color:var(--text-3)">Скоро</div>`}
+
       </button>
     `;
   }).join('');
