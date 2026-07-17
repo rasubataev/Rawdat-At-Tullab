@@ -4720,17 +4720,17 @@ function renderParts() {
   }).join('');
 }
 
-
-  function openPart(id) {
+function openPart(id) {
   const p = findPart(BOOK_ID, id);
   if (!p || p.locked) { toast('Скоро'); return; }
-  if (id === 'ajur-p1') {
+  if (LESSONS[id]) {
     LESSON_ID = id;
     navigate('s-lesson');
     return;
   }
   PART_ID = id; navigate('s-units');
 }
+
 function renderUnits() {
   const b = findBook(BOOK_ID), p = findPart(BOOK_ID, PART_ID); if (!p) return;
   $('#units-title').textContent = `${b?.title || ''} · ${p.title}`;
