@@ -3924,35 +3924,35 @@ locked: false,
       id: 'ajur-p2',
       num: 2,
       title: 'باب الإعراب',
-      locked: true,
+      locked: false,
       units: []
     },
     {
       id: 'ajur-p3',
       num: 3,
       title: 'باب معرفة علامات الإعراب',
-      locked: true,
+      locked: false,
       units: []
     },
     {
       id: 'ajur-p4',
       num: 4,
       title: 'فصل المعربات',
-      locked: true,
+      locked: false,
       units: []
     },
     {
       id: 'ajur-p5',
       num: 5,
       title: 'باب الأفعال',
-      locked: true,
+      locked: false,
       units: []
     },
     {
       id: 'ajur-p6',
       num: 6,
       title: 'باب مرفوعات الأسماء',
-      locked: true,
+      locked: false,
       units: []
     },
     {
