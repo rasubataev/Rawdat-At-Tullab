@@ -4331,13 +4331,17 @@ function rate(cardId, kind) {
 
 function previewIntervals(cardId) {
   const c = STATE.cards[cardId] || blankCard('','','');
-  const ease = c.ease || 2.5;
-  const reps = c.reps || 0;
   const iv = c.interval || 0;
-  const hard = fmtInterval(10 * 60 * 1000);
-  const okDays = reps === 0 ? 1 : reps === 1 ? 3 : Math.max(1, Math.round((iv || 1) * ease));
-  const easyDays = reps === 0 ? 4 : Math.max(1, Math.round((iv || 1) * ease * 1.3));
-  return { hard, ok: fmtInterval(okDays * DAY), easy: fmtInterval(easyDays * DAY) };
+  const MIN = 60 * 1000;
+  // Трудно -> 7 минут, Нормально -> 20 минут, Легко -> растёт 2 -> 5 -> 10 ...
+  const hard = fmtInterval(7 * MIN);
+  const ok = fmtInterval(20 * MIN);
+  let easyIv;
+  if (!iv || iv < 2) easyIv = 2;
+  else if (iv < 5) easyIv = 5;
+  else easyIv = Math.round(iv * 2);
+  const easy = fmtInterval(easyIv * DAY);
+  return { hard, ok, easy };
 }
 
 /* ===== DAY / STREAK ============================================= */
