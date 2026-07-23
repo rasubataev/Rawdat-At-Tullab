@@ -4928,7 +4928,9 @@ function collectMix() {
   return out;
 }
 function updateMixCount() { $('#mix-count').textContent = `${collectMix().length} слов`; }
-
+function stripHarakat(s) {
+  return String(s || '').replace(/[\u064B-\u065F\u0670\u06D6-\u06ED]/g, '');
+}
 /* SEARCH */
 let SEARCH_Q = '', SEARCH_FILTER = 'all';
 function renderSearch() {
@@ -4936,7 +4938,9 @@ function renderSearch() {
   $$('#s-search .seg').forEach(b => b.classList.toggle('on', b.dataset.sf === SEARCH_FILTER));
   const q = SEARCH_Q.trim().toLowerCase();
   const filtered = allWords().filter(w => {
-    if (q && !(w.ar || '').toLowerCase().includes(q) && !(w.ru || '').toLowerCase().includes(q)) return false;
+    const arNorm = stripHarakat(w.ar || '').toLowerCase();
+const qNorm = stripHarakat(q);
+if (q && !arNorm.includes(qNorm) && !(w.ru || '').toLowerCase().includes(q)) return false;
     const c = STATE.cards[keyOf(w.ar)];
     if (SEARCH_FILTER === 'new') return !c || (c.reps || 0) === 0;
     if (SEARCH_FILTER === 'learning') return c && (c.reps || 0) > 0 && !c.flags.learned;
