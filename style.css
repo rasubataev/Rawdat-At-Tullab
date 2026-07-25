@@ -1148,6 +1148,13 @@ html[data-theme="dark"] .ico-brand { background: var(--brand-100); color: var(--
   color: var(--text);
   text-align: center;
   padding: 10px 0 14px;
+
+}
+.pr-q-tr{
+  margin-top:4px;
+  text-align:center;
+  font-size:14px;
+  color:var(--text-3);
 }
 .pr-opts { display: flex; flex-direction: column; gap: 8px; }
 .pr-opt {
