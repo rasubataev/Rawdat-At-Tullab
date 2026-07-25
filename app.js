@@ -4579,6 +4579,7 @@ function currentScreen() {
 function runScreenRender(id) {
   switch (id) {
     case 's-home': renderHome(); break;
+    case 's-practice': renderPractice(); break;
     case 's-learn': renderLearn(); break;
     case 's-books': renderBooks(); break;
     case 's-parts': renderParts(); break;
@@ -5144,6 +5145,27 @@ document.addEventListener('click', e => {
     case 'export-data': exportData(); break;
     case 'import-data': importData(); break;
     case 'reset-data': resetData(); break;
+    case 'open-practice': openPractice(LESSON_ID); break;
+case 'pr-pick': {
+  if (PR_CHECKED) break;
+  PR_ANSWERS[parseInt(t.dataset.qi, 10)] = parseInt(t.dataset.oi, 10);
+  renderPractice();
+  break;
+}
+case 'pr-check': {
+  const p = PRACTICE[PRACTICE_ID];
+  const all = p.items.every((it, i) => it.open || PR_ANSWERS[i] !== undefined);
+  if (!all) { toast('Ответь на все вопросы'); break; }
+  PR_CHECKED = true;
+  renderPractice();
+  break;
+}
+case 'pr-reset': {
+  PR_ANSWERS = {};
+  PR_CHECKED = false;
+  renderPractice();
+  break;
+}
     case 'new-deck': sheetNewDeck(); break;
     case 'deck-menu': sheetEditDeck(DECK_ID); break;
     case 'deck-add-word': sheetAddWord(DECK_ID); break;
