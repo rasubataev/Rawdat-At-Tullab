@@ -1071,3 +1071,138 @@ html[data-theme="dark"] .ico-brand { background: var(--brand-100); color: var(--
   .tile-grid { grid-template-columns: repeat(4, 1fr); }
   .sheet { max-width: 960px; }
 }
+/* ═══════════════════════════════════════════════════════════
+   ЧАСТЬ 2 — style.css
+   Добавить в конец файла
+   ═══════════════════════════════════════════════════════════ */
+
+/* Таблица в уроке */
+.lesson-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: 14px;
+  background: var(--surface);
+  border-radius: var(--r-xl);
+  overflow: hidden;
+  box-shadow: var(--s-card);
+  border: 1px solid var(--border);
+  font-size: 13px;
+}
+.lesson-table th {
+  background: var(--brand-600);
+  color: #fff;
+  font-weight: 700;
+  font-size: 12px;
+  padding: 10px 10px;
+  text-align: left;
+}
+.lesson-table td {
+  padding: 9px 10px;
+  border-top: 1px solid var(--border);
+  color: var(--text-2);
+  line-height: 1.45;
+  vertical-align: top;
+}
+.lesson-table td:first-child {
+  font-family: var(--font-ar-classic);
+  font-size: 17px;
+  font-weight: 700;
+  color: var(--brand-600);
+  direction: rtl;
+  white-space: nowrap;
+}
+.lesson-table td:nth-child(2) {
+  font-weight: 600;
+  color: var(--text);
+  white-space: nowrap;
+}
+
+/* Практика */
+.pr-q {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--r-xl);
+  padding: 16px;
+  margin-bottom: 12px;
+  box-shadow: var(--s-card);
+}
+.pr-q-num {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--text-3);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  margin-bottom: 6px;
+}
+.pr-q-text {
+  font-size: 15px;
+  color: var(--text);
+  line-height: 1.5;
+  margin-bottom: 12px;
+}
+.pr-q-ar {
+  font-family: var(--font-ar-classic);
+  direction: rtl;
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--text);
+  text-align: center;
+  padding: 10px 0 14px;
+}
+.pr-opts { display: flex; flex-direction: column; gap: 8px; }
+.pr-opt {
+  padding: 11px 14px;
+  border-radius: var(--r-md);
+  background: var(--surface-2);
+  border: 1.5px solid var(--border);
+  font-size: 14.5px;
+  color: var(--text);
+  text-align: left;
+  transition: all var(--dur-1);
+  cursor: pointer;
+  width: 100%;
+}
+.pr-opt.sel {
+  background: var(--brand-100);
+  border-color: var(--brand-500);
+  color: var(--brand-600);
+  font-weight: 600;
+}
+.pr-opt.ok {
+  background: color-mix(in srgb, var(--brand-500) 15%, transparent);
+  border-color: var(--brand-500);
+  color: var(--brand-600);
+  font-weight: 700;
+}
+.pr-opt.bad {
+  background: var(--danger-bg);
+  border-color: var(--danger);
+  color: var(--danger);
+  font-weight: 600;
+}
+.pr-open {
+  background: var(--surface-2);
+  border-radius: var(--r-md);
+  padding: 12px 14px;
+  font-size: 14px;
+  color: var(--text-2);
+  line-height: 1.5;
+  border: 1px dashed var(--border-med);
+}
+.pr-result {
+  background: var(--brand-100);
+  border: 1px solid var(--brand-500);
+  border-radius: var(--r-xl);
+  padding: 18px;
+  text-align: center;
+  margin-bottom: 14px;
+}
+.pr-result-n {
+  font-family: var(--font-display);
+  font-size: 34px;
+  font-weight: 800;
+  color: var(--brand-600);
+  line-height: 1;
+}
+.pr-result-l { font-size: 13px; color: var(--text-2); margin-top: 5px; }
+
