@@ -3903,7 +3903,6 @@ const BOOKS = [
   id: 'ajur',
   ar: 'الآجرومية',
   title: 'Аль-Аджрумия',
-   locked: false,
    cover: 'icons/ajur.jpg.PNG',
   available: true,
   parts: [
