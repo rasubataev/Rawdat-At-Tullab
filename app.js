@@ -6379,13 +6379,7 @@ function renderLesson() {
   html += `</div>`;
 }
 
-    html += `<div class="lesson-card">
-      <div class="lesson-card-num" style="background:${c.color}">${c.num}</div>
-      <div class="lesson-card-ar">${esc(c.ar)}</div>
-      <div class="lesson-card-label">${esc(c.label).replace(/\n/g,'<br>')}</div>
-    </div>`;
-  });
-  html += `</div>`;
+
 
   // Таблица (новый формат)
   if (lesson.table) {
