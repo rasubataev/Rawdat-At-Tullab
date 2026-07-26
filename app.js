@@ -3903,7 +3903,7 @@ const BOOKS = [
   id: 'ajur',
   ar: 'الآجرومية',
   title: 'Аль-Аджрумия',
-   locked: true,
+   locked: false,
    cover: 'icons/ajur.jpg.PNG',
   available: true,
   parts: [
@@ -3911,7 +3911,7 @@ const BOOKS = [
       id: 'ajur-p0',
       num: 0,
       title: '    نبذة عن المؤلف',
-locked: true,
+locked: false,
       units: []
     },
      {
