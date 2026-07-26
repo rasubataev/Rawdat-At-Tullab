@@ -3910,7 +3910,7 @@ const BOOKS = [
       id: 'ajur-p0',
       num: 0,
       title: '    نبذة عن المؤلف',
-locked: true,
+locked: false,
       units: []
     },
      {
@@ -3959,140 +3959,140 @@ locked: false,
       id: 'ajur-p7',
       num: 7,
       title: 'باب الفاعل',
-      locked: true,
+      locked: false,
       units: []
     },
     {
       id: 'ajur-p8',
       num: 8,
       title: 'باب نائب الفاعل',
-      locked: true,
+      locked: false,
       units: []
     },
     {
       id: 'ajur-p9',
       num: 9,
       title: 'باب المبتدأ والخبر',
-      locked: true,
+      locked: false,
       units: []
     },
     {
       id: 'ajur-p10',
       num: 10,
       title: 'باب العوامل الداخلة على المبتدأ والخبر',
-      locked: true,
+      locked: false,
       units: []
     },
     {
       id: 'ajur-p11',
       num: 11,
       title: 'باب النعت',
-      locked: true,
+      locked: false,
       units: []
     },
     {
       id: 'ajur-p12',
       num: 12,
       title: 'باب العطف',
-      locked: true,
+      locked: false,
       units: []
     },
     {
       id: 'ajur-p13',
       num: 13,
       title: 'باب التوكيد',
-      locked: true,
+      locked: false,
       units: []
     },
     {
       id: 'ajur-p14',
       num: 14,
       title: 'باب البدل',
-      locked: true,
+      locked: false,
       units: []
     },
     {
       id: 'ajur-p15',
       num: 15,
       title: 'باب منصوبات الأسماء',
-      locked: true,
+      locked: false,
       units: []
     },
     {
       id: 'ajur-p16',
       num: 16,
       title: 'باب المفعول به',
-      locked: true,
+      locked: false,
       units: []
     },
     {
       id: 'ajur-p17',
       num: 17,
       title: 'باب المصدر',
-      locked: true,
+      locked: false,
       units: []
     },
     {
       id: 'ajur-p18',
       num: 18,
       title: 'باب ظرف الزمان والمكان',
-      locked: true,
+      locked: false,
       units: []
     },
     {
       id: 'ajur-p19',
       num: 19,
       title: 'باب الحال',
-      locked: true,
+      locked: false,
       units: []
     },
     {
       id: 'ajur-p20',
       num: 20,
       title: 'باب التمييز',
-      locked: true,
+      locked: false,
       units: []
     },
     {
       id: 'ajur-p21',
       num: 21,
       title: 'باب الاستثناء',
-      locked: true,
+      locked: false,
       units: []
     },
     {
       id: 'ajur-p22',
       num: 22,
       title: 'باب لا',
-      locked: true,
+      locked: false,
       units: []
     },
     {
       id: 'ajur-p23',
       num: 23,
       title: 'باب المنادى',
-      locked: true,
+      locked: false,
       units: []
     },
     {
       id: 'ajur-p24',
       num: 24,
       title: 'باب المفعول لأجله',
-      locked: true,
+      locked: false,
       units: []
     },
     {
       id: 'ajur-p25',
       num: 25,
       title: 'باب المفعول معه',
-      locked: true,
+      locked: false,
       units: []
     },
     {
       id: 'ajur-p26',
       num: 26,
       title: 'باب مخفوضات الأسماء',
-      locked: true,
+      locked: false,
       units: []
     }
   ]
