@@ -2040,3 +2040,8 @@ html[data-theme="light"] .toast { background: rgba(26,26,24,0.90); color: #F0F0E
   .tile-grid { grid-template-columns: repeat(4, 1fr); }
   .sheet { max-width: 960px; }
 }
+.tile:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--s-lg), 0 0 30px rgba(15,133,86,0.12);
+  border-color: rgba(15,133,86,0.25);
+}
