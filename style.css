@@ -213,7 +213,7 @@ a { color: inherit; text-decoration: none; }
 /* ============================================================
    ГЛОБАЛЬНЫЕ ДЕКОРАТИВНЫЕ ОРЕОЛЫ (только в тёмной теме)
    ============================================================ */
-body:not(html[data-theme="light"] body)::before {
+
   content: "";
   position: fixed;
   top: -200px;
@@ -222,7 +222,7 @@ body:not(html[data-theme="light"] body)::before {
   width: 600px;
   height: 500px;
   background: radial-gradient(ellipse at center,
-    rgba(15,133,86,0.18) 0%,
+    rgba(15,133,86,0.18) 0%,body:not(html[data-theme="light"] body)::before {
     rgba(15,133,86,0.06) 40%,
     transparent 70%
   );
@@ -255,6 +255,7 @@ body:not(html[data-theme="light"] body)::after {
   margin: 0 auto;
   position: relative;
   z-index: 1;
+  background: var(--bg);
 }
 
 .screen {
@@ -1223,7 +1224,7 @@ a { color: inherit; text-decoration: none; }
 /* ============================================================
    ГЛОБАЛЬНЫЕ ДЕКОРАТИВНЫЕ ОРЕОЛЫ (только в тёмной теме)
    ============================================================ */
-body:not(html[data-theme="light"] body)::before {
+body::before {
   content: "";
   position: fixed;
   top: -200px;
@@ -1239,7 +1240,7 @@ body:not(html[data-theme="light"] body)::before {
   pointer-events: none;
   z-index: 0;
 }
-body:not(html[data-theme="light"] body)::after {
+body::after {
   content: "";
   position: fixed;
   bottom: -100px;
@@ -1253,7 +1254,10 @@ body:not(html[data-theme="light"] body)::after {
   pointer-events: none;
   z-index: 0;
 }
-
+html[data-theme="light"] body::before,
+html[data-theme="light"] body::after {
+  display: none;
+}
 /* ============================================================
    LAYOUT SHELL
    ============================================================ */
