@@ -3897,7 +3897,7 @@ const BOOKS = [
       }
     ]
   },
-
+{ id: 'fikh-p0', num: 0, title: 'الْمُؤَلِّفُ', locked: false, units: [] },
   { id: 'bina', ar: 'البِنَاء', title: 'Аль-Бина',cover: 'icons/bina.PNG', locked: true, parts: [] },
 {
   id: 'ajur',
