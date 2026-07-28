@@ -5208,6 +5208,8 @@ document.addEventListener('click', e => {
     case 'reset-data': resetData(); break;
     case 'go-books': navigate('s-books'); break;
 case 'go-search': navigate('s-search'); break;
+case 'open-mix': navigate('s-mix'); break;
+case 'open-decks': navigate('s-decks'); break;
     case 'open-practice': openPractice(LESSON_ID); break;
 case 'pr-pick': {
   if (PR_CHECKED) break;
