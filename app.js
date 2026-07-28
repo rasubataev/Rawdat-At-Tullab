@@ -5595,6 +5595,8 @@ document.addEventListener('click', e => {
 case 'go-search': navigate('s-search'); break;
 case 'open-mix': navigate('s-mix'); break;
 case 'open-decks': navigate('s-decks'); break;
+case 'start-review':
+case 'start-due': startDue(); break;
     case 'open-practice': openPractice(LESSON_ID); break;
 case 'pr-pick': {
   if (PR_CHECKED) break;
