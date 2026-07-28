@@ -4251,6 +4251,8 @@ function defaultState() {
     days: {},
     streak: { current: 0, best: 0, lastActive: null },
     lastSession: null,
+    lessonsRead: {},
+    practiceDone: {},
   };
 }
 
@@ -4364,7 +4366,22 @@ function bumpDay(reviews = 0, correct = 0, newLearned = 0, ms = 0) {
   STATE.totals.reviewed += reviews;
   saveState();
 }
-
+function markActivity() {
+  const k = todayKey();
+  if (!STATE.days[k]) STATE.days[k] = { reviews: 0, correct: 0, new: 0, ms: 0 };
+  const last = STATE.streak.lastActive;
+  if (last !== k) {
+    if (!last) STATE.streak.current = 1;
+    else {
+      const diff = daysBetween(last, new Date());
+      if (diff === 1) STATE.streak.current += 1;
+      else if (diff > 1) STATE.streak.current = 1;
+    }
+    STATE.streak.best = Math.max(STATE.streak.best, STATE.streak.current);
+    STATE.streak.lastActive = k;
+  }
+  saveState();
+}
 function dueTodayCount() {
   const N = now();
   return Object.values(STATE.cards).filter(c => (c.due || 0) <= N).length;
@@ -4639,29 +4656,73 @@ g.innerHTML = _display.map(b => {
   }).join('');
 }
 
-/* LEARN HUB */
 function renderLearn() {
-  // Continue last
-  const last = STATE.lastSession;
-  const cont = $('#learn-continue');
-  if (last && last.type) {
-    cont.style.display = '';
-    $('#lc-title').textContent = last.title || 'Последняя сессия';
-    $('#lc-sub').textContent = ({ unit:'Вахьда', deck:'Колода', hard:'Трудные', mix:'Смешанное', due:'Повторение' })[last.type] || '';
-  } else {
-    cont.style.display = 'none';
-  }
-  // counters
   const due = dueTodayCount();
-  const hardCount = Object.values(STATE.cards).filter(c => c.flags.hard).length;
-  const deckCount = Object.keys(STATE.decks).length;
-  const allCount = allWords().length;
-  const newCount = allWords().filter(w => { const c = STATE.cards[keyOf(w.ar)]; return !c || (c.reps || 0) === 0; }).length;
-  $('#learn-due-count').textContent = due;
-  $('#learn-new-count').textContent = newCount;
-  $('#learn-hard-count').textContent = hardCount;
-  $('#learn-all-count').textContent = allCount;
-  $('#learn-decks-count').textContent = deckCount;
+  const hard = Object.values(STATE.cards).filter(c => c.flags && c.flags.hard).length;
+
+  let html = '';
+
+  // ПОВТОРЕНИЕ — только если есть что повторять
+  if (due > 0 || hard > 0) {
+    html += `<div class="section-head"><span class="eyebrow">Повторение</span></div>
+    <div class="list-group" style="margin:0 16px">`;
+    if (due > 0) {
+      html += `<button type="button" class="list-item" data-act="start-due">
+        <div class="li-icon ico-green"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg></div>
+        <div class="li-body"><div class="li-title">Повторить сегодня</div><div class="li-sub">Карточки по расписанию SRS</div></div>
+        <div class="li-trail"><span style="color:var(--brand-600);font-weight:700">${due}</span><svg viewBox="0 0 24 24"><path d="M9 6l6 6-6 6"/></svg></div>
+      </button>`;
+    }
+    if (hard > 0) {
+      html += `<button type="button" class="list-item" data-act="start-hard">
+        <div class="li-icon ico-orange"><svg viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg></div>
+        <div class="li-body"><div class="li-title">Трудные слова</div><div class="li-sub">Требуют особого внимания</div></div>
+        <div class="li-trail"><span style="font-weight:700">${hard}</span><svg viewBox="0 0 24 24"><path d="M9 6l6 6-6 6"/></svg></div>
+      </button>`;
+    }
+    html += `</div>`;
+  }
+
+  // СЛОВА
+  html += `<div class="section-head" style="margin-top:8px"><span class="eyebrow">Слова</span></div>
+  <div class="list-group" style="margin:0 16px">
+    <button type="button" class="list-item" data-act="start-new">
+      <div class="li-icon ico-blue"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 8v8M8 12h8"/></svg></div>
+      <div class="li-body"><div class="li-title">Новые слова</div><div class="li-sub">Ещё не изученные</div></div>
+      <div class="li-trail"><svg viewBox="0 0 24 24"><path d="M9 6l6 6-6 6"/></svg></div>
+    </button>
+    <button type="button" class="list-item" data-act="start-all">
+      <div class="li-icon ico-brand"><svg viewBox="0 0 24 24"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20"/></svg></div>
+      <div class="li-body"><div class="li-title">Все слова</div><div class="li-sub">Весь словарный запас</div></div>
+      <div class="li-trail"><span style="font-weight:600;color:var(--text-3)">${allWords().length}</span><svg viewBox="0 0 24 24"><path d="M9 6l6 6-6 6"/></svg></div>
+    </button>
+    <button type="button" class="list-item" data-act="open-mix">
+      <div class="li-icon ico-purple"><svg viewBox="0 0 24 24"><path d="M16 3h5v5M4 20L21 3M21 16v5h-5M15 15l6 6M4 4l5 5"/></svg></div>
+      <div class="li-body"><div class="li-title">Смешать</div><div class="li-sub">Вахьдаты + колоды</div></div>
+      <div class="li-trail"><svg viewBox="0 0 24 24"><path d="M9 6l6 6-6 6"/></svg></div>
+    </button>
+  </div>
+
+  <div class="section-head" style="margin-top:8px"><span class="eyebrow">Коллекции</span></div>
+  <div class="list-group" style="margin:0 16px">
+    <button type="button" class="list-item" data-act="go-books">
+      <div class="li-icon ico-green"><svg viewBox="0 0 24 24"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20M4 19.5A2.5 2.5 0 0 0 6.5 22H20V2H6.5A2.5 2.5 0 0 0 4 4.5v15z"/></svg></div>
+      <div class="li-body"><div class="li-title">Учебники</div><div class="li-sub">بين يديك и другие</div></div>
+      <div class="li-trail"><svg viewBox="0 0 24 24"><path d="M9 6l6 6-6 6"/></svg></div>
+    </button>
+    <button type="button" class="list-item" data-act="open-decks">
+      <div class="li-icon ico-blue"><svg viewBox="0 0 24 24"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/></svg></div>
+      <div class="li-body"><div class="li-title">Мои колоды</div><div class="li-sub">Личные наборы слов</div></div>
+      <div class="li-trail"><span style="font-weight:600;color:var(--text-3)">${Object.keys(STATE.decks).length}</span><svg viewBox="0 0 24 24"><path d="M9 6l6 6-6 6"/></svg></div>
+    </button>
+    <button type="button" class="list-item" data-act="go-search">
+      <div class="li-icon ico-orange"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg></div>
+      <div class="li-body"><div class="li-title">Поиск слов</div><div class="li-sub">По всему словарю</div></div>
+      <div class="li-trail"><svg viewBox="0 0 24 24"><path d="M9 6l6 6-6 6"/></svg></div>
+    </button>
+  </div>`;
+
+  $('#learn-list').innerHTML = html;
 }
 
 /* BOOKS */
@@ -5145,6 +5206,8 @@ document.addEventListener('click', e => {
     case 'export-data': exportData(); break;
     case 'import-data': importData(); break;
     case 'reset-data': resetData(); break;
+    case 'go-books': navigate('s-books'); break;
+case 'go-search': navigate('s-search'); break;
     case 'open-practice': openPractice(LESSON_ID); break;
 case 'pr-pick': {
   if (PR_CHECKED) break;
@@ -5157,6 +5220,13 @@ case 'pr-check': {
   const all = p.items.every((it, i) => it.open || PR_ANSWERS[i] !== undefined);
   if (!all) { toast('Ответь на все вопросы'); break; }
   PR_CHECKED = true;
+  const closed = p.items.filter(i => !i.open);
+  let ok = 0;
+  p.items.forEach((it, i) => { if (!it.open && PR_ANSWERS[i] === it.a) ok++; });
+  const pct = closed.length ? Math.round(ok / closed.length * 100) : 0;
+  if (!STATE.practiceDone) STATE.practiceDone = {};
+  STATE.practiceDone[PRACTICE_ID] = { pct, date: todayKey() };
+  bumpDay(closed.length, ok, 0, 0);
   renderPractice();
   break;
 }
@@ -7468,6 +7538,13 @@ let LESSON_ID = null;
 
 function openLesson(partId) {
   LESSON_ID = partId;
+  navigate('s-lesson');
+}
+function openLesson(partId) {
+  LESSON_ID = partId;
+  if (!STATE.lessonsRead) STATE.lessonsRead = {};
+  STATE.lessonsRead[partId] = now();
+  markActivity();
   navigate('s-lesson');
 }
 
