@@ -4832,7 +4832,14 @@ function startSession({ type, title, words, backScreen = 's-home' }) {
   renderStudyHeader();
   renderNextCard();
 }
-
+function startDue() {
+  const due = allWords().filter(w => {
+    const c = STATE.cards[keyOf(w.ar)];
+    return c && c.due && c.due <= now();
+  });
+  if (!due.length) { toast('Нет слов к повторению'); return; }
+  startSession({ type: 'due', title: 'Повторение', words: due, backScreen: 's-learn' });
+}
 const Q_STEPS = { hard: 6, ok: 14, easy: 40 };
 function reinsert(cardId, kind) {
   const pos = Math.min(Q_STEPS[kind] || 10, session.queue.length);
