@@ -4971,6 +4971,7 @@ function currentScreen() {
 function runScreenRender(id) {
   switch (id) {
     case 's-home': renderHome(); break;
+    case 's-translate': break;
     case 's-practice': renderPractice(); break;
     case 's-learn': renderLearn(); break;
     case 's-books': renderBooks(); break;
@@ -4978,7 +4979,6 @@ function runScreenRender(id) {
     case 's-units': renderUnits(); break;
     case 's-unit': renderUnit(); break;
     case 's-decks': renderDecks(); break;
-    case 's-translate': break;
     case 's-deck': renderDeck(); break;
     case 's-hard': renderHard(); break;
     case 's-mix': renderMix(); break;
@@ -5099,14 +5099,15 @@ function renderLearn() {
   </div>`;
 
   $('#learn-list').innerHTML = html;
-}
-html += `<button type="button" class="list-item" data-go="s-translate">
+  html += `<button type="button" class="list-item" data-go="s-translate">
   <div class="li-icon ico-brand">
-    <svg viewBox="0 0 24 24"><path d="M3 5h12M9 3v2m1.5 11l-2.5 2.5M5 8l4 4M21 12l-4 4m0 0l4 4m-4-4H7"/></svg>
+    <svg viewBox="0 0 24 24"><path d="M3 5h12M9 3v2M5 8l4 4M21 12l-4 4m0 0l4 4m-4-4H7"/></svg>
   </div>
   <div class="li-body"><div class="li-title">Переводчик</div><div class="li-sub">AR ↔ RU</div></div>
   <div class="li-trail"><svg viewBox="0 0 24 24"><path d="M9 6l6 6-6 6"/></svg></div>
 </button>`;
+}
+
 /* BOOKS */
 function renderBooks() {
   $('#books-list').innerHTML = `<div class="tile-grid" style="margin:12px 16px">` +
@@ -5602,21 +5603,6 @@ case 'pr-pick': {
   renderPractice();
   break;
 }
-case 'pr-check': {
-  const p = PRACTICE[PRACTICE_ID];
-  const all = p.items.every((it, i) => it.open || PR_ANSWERS[i] !== undefined);
-  if (!all) { toast('Ответь на все вопросы'); break; }
-  PR_CHECKED = true;
-  const closed = p.items.filter(i => !i.open);
-  let ok = 0;
-  p.items.forEach((it, i) => { if (!it.open && PR_ANSWERS[i] === it.a) ok++; });
-  const pct = closed.length ? Math.round(ok / closed.length * 100) : 0;
-  if (!STATE.practiceDone) STATE.practiceDone = {};
-  STATE.practiceDone[PRACTICE_ID] = { pct, date: todayKey() };
-  bumpDay(closed.length, ok, 0, 0);
-  renderPractice();
-  break;
-}
 case 'do-translate': {
   const text = $('#tr-input').value.trim();
   if (!text) { toast('Введи текст'); break; }
@@ -5638,6 +5624,22 @@ case 'tr-dir-ru': {
   $('#tr-dir-ar').classList.remove('on');
   break;
 }
+case 'pr-check': {
+  const p = PRACTICE[PRACTICE_ID];
+  const all = p.items.every((it, i) => it.open || PR_ANSWERS[i] !== undefined);
+  if (!all) { toast('Ответь на все вопросы'); break; }
+  PR_CHECKED = true;
+  const closed = p.items.filter(i => !i.open);
+  let ok = 0;
+  p.items.forEach((it, i) => { if (!it.open && PR_ANSWERS[i] === it.a) ok++; });
+  const pct = closed.length ? Math.round(ok / closed.length * 100) : 0;
+  if (!STATE.practiceDone) STATE.practiceDone = {};
+  STATE.practiceDone[PRACTICE_ID] = { pct, date: todayKey() };
+  bumpDay(closed.length, ok, 0, 0);
+  renderPractice();
+  break;
+}
+
 case 'pr-reset': {
   PR_ANSWERS = {};
   PR_CHECKED = false;
@@ -8537,4 +8539,3 @@ async function translateWord(text, toLang = 'ru') {
     return null;
   }
 }
-
