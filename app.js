@@ -5599,7 +5599,7 @@ case 'pr-pick': {
 case 'do-translate': {
   const text = $('#tr-input').value.trim();
   if (!text) { toast('Введи текст'); break; }
-  const dir = $('#tr-dir-ar').classList.contains('on') ? 'ru' : 'ar';
+  const dir = document.querySelector('#s-translate .seg.on')?.textContent?.includes('AR') ? 'ru' : 'ar';
   $('#tr-result').textContent = '...';
   translateWord(text, dir).then(res => {
     $('#tr-result').textContent = res || 'Не удалось перевести';
@@ -5608,13 +5608,13 @@ case 'do-translate': {
   break;
 }
 case 'tr-dir-ar': {
-  $('#tr-dir-ar').classList.add('on');
-  $('#tr-dir-ru').classList.remove('on');
+  $$('#s-translate .seg').forEach(b => b.classList.remove('on'));
+  t.classList.add('on');
   break;
 }
 case 'tr-dir-ru': {
-  $('#tr-dir-ru').classList.add('on');
-  $('#tr-dir-ar').classList.remove('on');
+  $$('#s-translate .seg').forEach(b => b.classList.remove('on'));
+  t.classList.add('on');
   break;
 }
 case 'pr-check': {
@@ -8519,16 +8519,20 @@ applyTheme(STATE.settings?.theme || 'light');
 navigate('s-home', { stack: false });
 async function translateWord(text, toLang = 'ru') {
   if (!text) return null;
+  const prompt = toLang === 'ru'
+    ? `Переведи арабское слово или фразу на русский. Только перевод, без пояснений: ${text}`
+    : `Переведи русское слово или фразу на арабский. Только арабский перевод, без пояснений: ${text}`;
   try {
-    const res = await fetch('https://super-thunder-41d7.z7gf59b4cn.workers.dev', {
+    const res = await fetch('https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=AQ.Ab8RN6KwSzw2lUVTRssQUEBHO8dp0arpl7pVcBPuYLKZJtQbdQ', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ text, toLang })
+      body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] })
     });
     const data = await res.json();
-    return data.result || null;
+    return data.candidates?.[0]?.content?.parts?.[0]?.text?.trim() || null;
   } catch(e) {
     toast('Ошибка перевода');
     return null;
   }
 }
+
