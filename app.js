@@ -8523,7 +8523,7 @@ async function translateWord(text, toLang = 'ru') {
     ? `Переведи арабское слово или фразу на русский. Только перевод, без пояснений: ${text}`
     : `Переведи русское слово или фразу на арабский. Только арабский перевод, без пояснений: ${text}`;
   try {
-    const res = await fetch('https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=AQ.Ab8RN6KwSzw2lUVTRssQUEBHO8dp0arpl7pVcBPuYLKZJtQbdQ', {
+    const res = await fetch('https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=AQ.Ab8RN6J_lAVlBA_t6e1FpbTuCOeExfJbrJoNs-aQ3PrW1jLE8g', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] })
