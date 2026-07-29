@@ -614,7 +614,26 @@
   </div>
   <div id="practice-body" style="padding:0 16px 28px"></div>
 </section>
+<section id="s-translate" class="screen hidden">
+  <div class="topbar">
+    <button type="button" class="icon-btn" data-back>
+      <svg viewBox="0 0 24 24"><path d="M15 6l-6 6 6 6"/></svg>
+    </button>
+    <span class="topbar-title">Переводчик</span>
+    <div style="width:38px"></div>
+  </div>
+  <div style="padding:16px">
+    <div class="segmented" style="margin:0 0 14px">
+      <button type="button" class="seg on" data-act="tr-dir-ar">AR → RU</button>
+      <button type="button" class="seg" data-act="tr-dir-ru">RU → AR</button>
+    </div>
+    <textarea class="input" id="tr-input" placeholder="Введи слово..." style="min-height:80px;font-size:18px"></textarea>
+    <button type="button" class="btn btn-primary" style="margin-top:10px" data-act="do-translate">Перевести</button>
+    <div id="tr-result" style="margin-top:16px;font-size:20px;font-family:var(--font-ar-classic);text-align:center;min-height:40px;color:var(--brand-600);font-weight:700"></div>
+  </div>
+</section>
 </div><!-- /.app -->
+
 <div class="toast" id="toast"></div>
 
 <script src="app.js"></script>
