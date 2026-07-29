@@ -5091,21 +5091,14 @@ function renderLearn() {
       <div class="li-body"><div class="li-title">Мои колоды</div><div class="li-sub">Личные наборы слов</div></div>
       <div class="li-trail"><span style="font-weight:600;color:var(--text-3)">${Object.keys(STATE.decks).length}</span><svg viewBox="0 0 24 24"><path d="M9 6l6 6-6 6"/></svg></div>
     </button>
-    <button type="button" class="list-item" data-act="go-search">
-      <div class="li-icon ico-orange"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg></div>
-      <div class="li-body"><div class="li-title">Поиск слов</div><div class="li-sub">По всему словарю</div></div>
+   <button type="button" class="list-item" data-go="s-translate">
+      <div class="li-icon ico-brand"><svg viewBox="0 0 24 24"><path d="M3 5h12M9 3v2M5 8l4 4M21 12l-4 4m0 0l4 4m-4-4H7"/></svg></div>
+      <div class="li-body"><div class="li-title">Переводчик</div><div class="li-sub">AR ↔ RU</div></div>
       <div class="li-trail"><svg viewBox="0 0 24 24"><path d="M9 6l6 6-6 6"/></svg></div>
     </button>
   </div>`;
 
   $('#learn-list').innerHTML = html;
-  html += `<button type="button" class="list-item" data-go="s-translate">
-  <div class="li-icon ico-brand">
-    <svg viewBox="0 0 24 24"><path d="M3 5h12M9 3v2M5 8l4 4M21 12l-4 4m0 0l4 4m-4-4H7"/></svg>
-  </div>
-  <div class="li-body"><div class="li-title">Переводчик</div><div class="li-sub">AR ↔ RU</div></div>
-  <div class="li-trail"><svg viewBox="0 0 24 24"><path d="M9 6l6 6-6 6"/></svg></div>
-</button>`;
 }
 
 /* BOOKS */
