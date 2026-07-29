@@ -4978,6 +4978,7 @@ function runScreenRender(id) {
     case 's-units': renderUnits(); break;
     case 's-unit': renderUnit(); break;
     case 's-decks': renderDecks(); break;
+    case 's-translate': break;
     case 's-deck': renderDeck(); break;
     case 's-hard': renderHard(); break;
     case 's-mix': renderMix(); break;
@@ -5099,7 +5100,13 @@ function renderLearn() {
 
   $('#learn-list').innerHTML = html;
 }
-
+html += `<button type="button" class="list-item" data-go="s-translate">
+  <div class="li-icon ico-brand">
+    <svg viewBox="0 0 24 24"><path d="M3 5h12M9 3v2m1.5 11l-2.5 2.5M5 8l4 4M21 12l-4 4m0 0l4 4m-4-4H7"/></svg>
+  </div>
+  <div class="li-body"><div class="li-title">Переводчик</div><div class="li-sub">AR ↔ RU</div></div>
+  <div class="li-trail"><svg viewBox="0 0 24 24"><path d="M9 6l6 6-6 6"/></svg></div>
+</button>`;
 /* BOOKS */
 function renderBooks() {
   $('#books-list').innerHTML = `<div class="tile-grid" style="margin:12px 16px">` +
@@ -5569,6 +5576,7 @@ document.addEventListener('click', e => {
   const act = t.getAttribute('data-act');
   if (!act) return;
   switch (act) {
+    
     case 'open-book': openBook(t.dataset.book); break;
     case 'open-part': openPart(t.dataset.part); break;
     case 'open-lesson': openLesson(t.dataset.lesson); break;
@@ -5607,6 +5615,27 @@ case 'pr-check': {
   STATE.practiceDone[PRACTICE_ID] = { pct, date: todayKey() };
   bumpDay(closed.length, ok, 0, 0);
   renderPractice();
+  break;
+}
+case 'do-translate': {
+  const text = $('#tr-input').value.trim();
+  if (!text) { toast('Введи текст'); break; }
+  const dir = $('#tr-dir-ar').classList.contains('on') ? 'ru' : 'ar';
+  $('#tr-result').textContent = '...';
+  translateWord(text, dir).then(res => {
+    $('#tr-result').textContent = res || 'Не удалось перевести';
+    $('#tr-result').style.direction = dir === 'ru' ? 'ltr' : 'rtl';
+  });
+  break;
+}
+case 'tr-dir-ar': {
+  $('#tr-dir-ar').classList.add('on');
+  $('#tr-dir-ru').classList.remove('on');
+  break;
+}
+case 'tr-dir-ru': {
+  $('#tr-dir-ru').classList.add('on');
+  $('#tr-dir-ar').classList.remove('on');
   break;
 }
 case 'pr-reset': {
@@ -8493,3 +8522,19 @@ function renderLesson() {
 
 applyTheme(STATE.settings?.theme || 'light');
 navigate('s-home', { stack: false });
+async function translateWord(text, toLang = 'ru') {
+  if (!text) return null;
+  try {
+    const res = await fetch('https://super-thunder-41d7.z7gf59b4cn.workers.dev', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ text, toLang })
+    });
+    const data = await res.json();
+    return data.result || null;
+  } catch(e) {
+    toast('Ошибка перевода');
+    return null;
+  }
+}
+
