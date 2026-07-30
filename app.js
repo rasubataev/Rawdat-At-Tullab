@@ -8529,7 +8529,8 @@ async function translateWord(text, toLang = 'ru') {
       body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] })
     });
     const data = await res.json();
-    return data.candidates?.[0]?.content?.parts?.[0]?.text?.trim() || null;
+   console.log('Gemini:', JSON.stringify(data));
+return data.candidates?.[0]?.content?.parts?.[0]?.text?.trim() || null;
   } catch(e) {
     toast('Ошибка перевода');
     return null;
