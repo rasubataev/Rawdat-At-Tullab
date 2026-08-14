@@ -4590,6 +4590,13 @@ const shuffle = arr => {
   return a;
 };
 
+function pluralWords(n) {
+  const mod10 = n % 10, mod100 = n % 100;
+  if (mod10 === 1 && mod100 !== 11) return 'слово';
+  if ([2,3,4].includes(mod10) && ![12,13,14].includes(mod100)) return 'слова';
+  return 'слов';
+}
+
 const fmtInterval = ms => {
   if (ms <= 0) return 'сейчас';
   const m = Math.round(ms / 60000);
@@ -5091,7 +5098,11 @@ function renderLearn() {
       <div class="li-body"><div class="li-title">Мои колоды</div><div class="li-sub">Личные наборы слов</div></div>
       <div class="li-trail"><span style="font-weight:600;color:var(--text-3)">${Object.keys(STATE.decks).length}</span><svg viewBox="0 0 24 24"><path d="M9 6l6 6-6 6"/></svg></div>
     </button>
-   <button type="button" class="list-item" data-act="coming-soon">
+  </div>
+
+  <div class="section-head" style="margin-top:8px"><span class="eyebrow">Инструменты</span></div>
+  <div class="list-group" style="margin:0 16px">
+    <button type="button" class="list-item" data-act="coming-soon">
       <div class="li-icon ico-brand"><svg viewBox="0 0 24 24"><path d="M3 5h12M9 3v2M5 8l4 4M21 12l-4 4m0 0l4 4m-4-4H7"/></svg></div>
       <div class="li-body"><div class="li-title">Переводчик</div><div class="li-sub">AR ↔ RU</div></div>
       <div class="li-trail"><svg viewBox="0 0 24 24"><path d="M9 6l6 6-6 6"/></svg></div>
@@ -5099,6 +5110,11 @@ function renderLearn() {
     <button type="button" class="list-item" data-act="coming-soon">
       <div class="li-icon ico-purple"><svg viewBox="0 0 24 24"><path d="M4 6h16M4 12h10M4 18h16"/></svg></div>
       <div class="li-body"><div class="li-title">Грамматический разбор</div><div class="li-sub">И'раб слов и предложений</div></div>
+      <div class="li-trail"><svg viewBox="0 0 24 24"><path d="M9 6l6 6-6 6"/></svg></div>
+    </button>
+    <button type="button" class="list-item" data-act="coming-soon">
+      <div class="li-icon ico-orange"><svg viewBox="0 0 24 24"><path d="M4 4h16v4H4zM4 10h10v4H4zM4 16h16v4H4z"/></svg></div>
+      <div class="li-body"><div class="li-title">Сарф</div><div class="li-sub">Морфологический разбор слов</div></div>
       <div class="li-trail"><svg viewBox="0 0 24 24"><path d="M9 6l6 6-6 6"/></svg></div>
     </button>
   </div>`;
@@ -5441,6 +5457,9 @@ function renderSettings() {
   $('#theme-toggle').classList.toggle('on', isDark);
   $('#theme-label').textContent = isDark ? 'Тёмная тема' : 'Светлая тема';
   $('#gemini-key-input').value = STATE.settings?.geminiKey || '';
+  const notifOn = !!STATE.settings?.notifications;
+  $('#notif-toggle').classList.toggle('on', notifOn);
+  $('#notif-label').textContent = notifOn ? 'Включены' : 'Выключены';
 }
 function saveGeminiKey() {
   const key = $('#gemini-key-input').value.trim();
@@ -5459,6 +5478,44 @@ function toggleTheme() {
   applyTheme(STATE.settings.theme === 'dark' ? 'light' : 'dark');
   renderSettings();
   toast(STATE.settings.theme === 'dark' ? 'Тёмная тема' : 'Светлая тема');
+}
+
+/* ===== NOTIFICATIONS ============================================= */
+async function toggleNotifications() {
+  const turningOn = !STATE.settings?.notifications;
+  if (turningOn) {
+    if (!('Notification' in window)) { toast('Браузер не поддерживает уведомления'); return; }
+    let perm = Notification.permission;
+    if (perm === 'default') perm = await Notification.requestPermission();
+    if (perm !== 'granted') { toast('Разреши уведомления в настройках браузера'); return; }
+    STATE.settings.notifications = true;
+    saveState();
+    renderSettings();
+    toast('Уведомления включены');
+    checkDueNotify(true);
+  } else {
+    STATE.settings.notifications = false;
+    saveState();
+    renderSettings();
+    toast('Уведомления выключены');
+  }
+}
+
+function checkDueNotify(force = false) {
+  if (!STATE.settings?.notifications) return;
+  if (!('Notification' in window) || Notification.permission !== 'granted') return;
+  const due = dueTodayCount();
+  if (!due) return;
+  const last = STATE.settings.lastNotified || 0;
+  if (!force && now() - last < 4 * 60 * 60 * 1000) return; // не чаще раза в 4 часа
+  STATE.settings.lastNotified = now();
+  saveState();
+  try {
+    new Notification('Rawdat At-Tullab', {
+      body: `${due} ${pluralWords(due)} ждут повторения`,
+      icon: 'icons/logo.PNG',
+    });
+  } catch(e) {}
 }
 
 /* ===== FAV ====================================================== */
@@ -5524,7 +5581,9 @@ function sheetEditWord(deckId, idx) {
 /* ===== EXPORT / IMPORT ========================================== */
 function exportData() {
   try {
-    const blob = new Blob([JSON.stringify(STATE, null, 2)], { type: 'application/json' });
+    const exportable = JSON.parse(JSON.stringify(STATE));
+    delete exportable.settings?.geminiKey;
+    const blob = new Blob([JSON.stringify(exportable, null, 2)], { type: 'application/json' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url; a.download = `darul-hadis-${todayKey()}.json`;
@@ -8531,6 +8590,9 @@ function renderLesson() {
 
 applyTheme(STATE.settings?.theme || 'light');
 navigate('s-home', { stack: false });
+checkDueNotify();
+setInterval(() => checkDueNotify(), 10 * 60 * 1000);
+document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible') checkDueNotify(); });
 async function translateWord(text, toLang = 'ru') {
   if (!text) return null;
   const key = STATE.settings?.geminiKey;
