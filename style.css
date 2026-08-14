@@ -3,7 +3,7 @@
    Dark glass redesign: deep black + emerald glow + glassmorphism
    ================================================================ */
 
-@import url('https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800;900&family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700;9..144,800&family=Inter:wght@400;500;600;700;800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800;900&display=swap');
 
 /* ============================================================
    DESIGN TOKENS — DARK GLASS DEFAULT
@@ -140,9 +140,9 @@
     --dur-3: 340ms;
     --dur-4: 520ms;
 
-    /* Typography */
-    --font-ui: "Inter", -apple-system, BlinkMacSystemFont, "SF Pro Text", system-ui, sans-serif;
-    --font-display: "Fraunces", Georgia, "Iowan Old Style", serif;
+    /* Typography — SF Pro everywhere for Cyrillic/Latin, weight/tracking carry the hierarchy */
+    --font-ui: -apple-system, BlinkMacSystemFont, "SF Pro Text", system-ui, "Segoe UI", Roboto, sans-serif;
+    --font-display: -apple-system, BlinkMacSystemFont, "SF Pro Display", system-ui, "Segoe UI", Roboto, sans-serif;
     --font-ar: "Tajawal", "SF Arabic", "Noto Naskh Arabic", "Amiri", serif;
     --font-ar-classic: "SF Arabic", "Geeza Pro", "Noto Naskh Arabic", "Amiri", serif;
     --font-mono: "SF Mono", "Fira Code", monospace;
@@ -373,8 +373,6 @@
     color: var(--text-2);
     transition: transform var(--dur-1) var(--ease-spring), background var(--dur-1), box-shadow var(--dur-1);
     flex-shrink: 0;
-    backdrop-filter: blur(10px);
-    -webkit-backdrop-filter: blur(10px);
   }
 
   .icon-btn:active {
@@ -476,8 +474,6 @@
     overflow: hidden;
     box-shadow: var(--s-card);
     border: 1px solid var(--border);
-    backdrop-filter: blur(20px);
-    -webkit-backdrop-filter: blur(20px);
   }
 
   .list-group+.list-group {
@@ -590,8 +586,6 @@
     box-shadow: var(--s-card);
     border: 1px solid var(--border);
     margin: 0 16px;
-    backdrop-filter: blur(20px);
-    -webkit-backdrop-filter: blur(20px);
   }
 
   .card+.card {
@@ -698,8 +692,6 @@
     border-radius: 14px;
     padding: 11px 8px;
     text-align: center;
-    backdrop-filter: blur(16px);
-    -webkit-backdrop-filter: blur(16px);
     transition: background var(--dur-1);
   }
 
@@ -752,15 +744,13 @@
   .btn-hero.primary {
     background: rgba(255, 255, 255, 0.95);
     color: #064A2F;
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.25);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.25), 0 0 22px rgba(94, 219, 168, 0.45);
   }
 
   .btn-hero.ghost {
     background: rgba(255, 255, 255, 0.10);
     color: rgba(255, 255, 255, 0.90);
     border: 1px solid rgba(255, 255, 255, 0.18);
-    backdrop-filter: blur(10px);
-    -webkit-backdrop-filter: blur(10px);
   }
 
   .btn-hero svg {
@@ -798,8 +788,6 @@
     width: 100%;
     position: relative;
     overflow: hidden;
-    backdrop-filter: blur(20px);
-    -webkit-backdrop-filter: blur(20px);
   }
 
   .tile:active {
@@ -956,8 +944,6 @@
     background: var(--surface-2);
     color: var(--text);
     border: 1px solid var(--border-med);
-    backdrop-filter: blur(10px);
-    -webkit-backdrop-filter: blur(10px);
   }
 
   .btn-ghost {
@@ -1006,8 +992,6 @@
     border: 1px solid var(--border-med);
     transition: background var(--dur-1), color var(--dur-1), border-color var(--dur-1), transform var(--dur-1) var(--ease-spring);
     white-space: nowrap;
-    backdrop-filter: blur(10px);
-    -webkit-backdrop-filter: blur(10px);
   }
 
   .chip:active {
@@ -1116,8 +1100,6 @@
     min-height: 44px;
     margin: 8px 16px 0;
     border: 1px solid var(--border-med);
-    backdrop-filter: blur(20px);
-    -webkit-backdrop-filter: blur(20px);
   }
 
   .search-wrap:focus-within {
@@ -1268,8 +1250,6 @@
     overflow: hidden;
     gap: 0;
     isolation: isolate;
-    backdrop-filter: blur(20px);
-    -webkit-backdrop-filter: blur(20px);
   }
 
   .flashcard::before {
@@ -1463,19 +1443,16 @@
   .rate-btn.hard {
     background: linear-gradient(160deg, rgba(224, 80, 96, 0.90), rgba(192, 57, 43, 0.90));
     box-shadow: 0 4px 20px rgba(192, 57, 43, 0.30);
-    backdrop-filter: blur(10px);
   }
 
   .rate-btn.ok {
     background: linear-gradient(160deg, rgba(232, 168, 64, 0.90), rgba(192, 122, 30, 0.90));
     box-shadow: 0 4px 20px rgba(192, 122, 30, 0.30);
-    backdrop-filter: blur(10px);
   }
 
   .rate-btn.easy {
     background: linear-gradient(160deg, rgba(46, 201, 138, 0.90), rgba(15, 133, 86, 0.90));
     box-shadow: 0 4px 20px rgba(15, 133, 86, 0.35);
-    backdrop-filter: blur(10px);
   }
 
   /* Summary */
@@ -1487,8 +1464,6 @@
     text-align: center;
     box-shadow: var(--s-card);
     border: 1px solid var(--border);
-    backdrop-filter: blur(20px);
-    -webkit-backdrop-filter: blur(20px);
   }
 
   .summary-emoji {
@@ -1558,8 +1533,6 @@
     background: var(--surface);
     box-shadow: var(--s-card);
     border: 1px solid var(--border);
-    backdrop-filter: blur(20px);
-    -webkit-backdrop-filter: blur(20px);
   }
 
   .kpi .kpi-label {
@@ -1602,8 +1575,6 @@
     padding: 18px;
     box-shadow: var(--s-card);
     border: 1px solid var(--border);
-    backdrop-filter: blur(20px);
-    -webkit-backdrop-filter: blur(20px);
   }
 
   .heatmap {
@@ -1725,6 +1696,11 @@
     transform: scale(1.0);
     stroke-width: 2;
     fill: none;
+    filter: drop-shadow(0 0 6px rgba(46, 201, 138, 0.55));
+  }
+
+  html[data-theme="light"] .nav-btn.active svg {
+    filter: drop-shadow(0 0 5px rgba(15, 133, 86, 0.35));
   }
 
   .nav-btn:active svg {
@@ -2037,8 +2013,6 @@
     overflow: hidden;
     box-shadow: var(--s-card);
     border: 1px solid var(--border);
-    backdrop-filter: blur(20px);
-    -webkit-backdrop-filter: blur(20px);
   }
 
   .settings-toggle {
@@ -2113,8 +2087,6 @@
     margin: 0 16px;
     box-shadow: var(--s-card);
     border: 1px solid var(--border);
-    backdrop-filter: blur(20px);
-    -webkit-backdrop-filter: blur(20px);
   }
 
   .unit-info-card .ui-row {
@@ -2223,8 +2195,6 @@
     box-shadow: var(--s-card);
     border: 1px solid var(--border);
     color: var(--text);
-    backdrop-filter: blur(20px);
-    -webkit-backdrop-filter: blur(20px);
   }
 
   .lesson-explain {
@@ -2265,8 +2235,6 @@
     text-align: center;
     box-shadow: var(--s-card);
     border: 1px solid var(--border);
-    backdrop-filter: blur(20px);
-    -webkit-backdrop-filter: blur(20px);
   }
 
   .lesson-card-num {
@@ -2304,8 +2272,6 @@
     margin-bottom: 10px;
     box-shadow: var(--s-card);
     border: 1px solid var(--border);
-    backdrop-filter: blur(20px);
-    -webkit-backdrop-filter: blur(20px);
   }
 
   .lesson-section-title {
@@ -2386,8 +2352,6 @@
     box-shadow: var(--s-card);
     border: 1px solid var(--border);
     font-size: 13px;
-    backdrop-filter: blur(20px);
-    -webkit-backdrop-filter: blur(20px);
   }
 
   .lesson-table th {
@@ -2431,8 +2395,6 @@
     padding: 16px;
     margin-bottom: 12px;
     box-shadow: var(--s-card);
-    backdrop-filter: blur(20px);
-    -webkit-backdrop-filter: blur(20px);
   }
 
   .pr-q-num {
@@ -2782,8 +2744,6 @@
     color: var(--text-2);
     transition: transform var(--dur-1) var(--ease-spring), background var(--dur-1), box-shadow var(--dur-1);
     flex-shrink: 0;
-    backdrop-filter: blur(10px);
-    -webkit-backdrop-filter: blur(10px);
   }
 
   .icon-btn:active {
@@ -2885,8 +2845,6 @@
     overflow: hidden;
     box-shadow: var(--s-card);
     border: 1px solid var(--border);
-    backdrop-filter: blur(20px);
-    -webkit-backdrop-filter: blur(20px);
   }
 
   .list-group+.list-group {
@@ -2999,8 +2957,6 @@
     box-shadow: var(--s-card);
     border: 1px solid var(--border);
     margin: 0 16px;
-    backdrop-filter: blur(20px);
-    -webkit-backdrop-filter: blur(20px);
   }
 
   .card+.card {
@@ -3107,8 +3063,6 @@
     border-radius: 14px;
     padding: 11px 8px;
     text-align: center;
-    backdrop-filter: blur(16px);
-    -webkit-backdrop-filter: blur(16px);
     transition: background var(--dur-1);
   }
 
@@ -3161,15 +3115,13 @@
   .btn-hero.primary {
     background: rgba(255, 255, 255, 0.95);
     color: #064A2F;
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.25);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.25), 0 0 22px rgba(94, 219, 168, 0.45);
   }
 
   .btn-hero.ghost {
     background: rgba(255, 255, 255, 0.10);
     color: rgba(255, 255, 255, 0.90);
     border: 1px solid rgba(255, 255, 255, 0.18);
-    backdrop-filter: blur(10px);
-    -webkit-backdrop-filter: blur(10px);
   }
 
   .btn-hero svg {
@@ -3207,8 +3159,6 @@
     width: 100%;
     position: relative;
     overflow: hidden;
-    backdrop-filter: blur(20px);
-    -webkit-backdrop-filter: blur(20px);
   }
 
   .tile:active {
@@ -3365,8 +3315,6 @@
     background: var(--surface-2);
     color: var(--text);
     border: 1px solid var(--border-med);
-    backdrop-filter: blur(10px);
-    -webkit-backdrop-filter: blur(10px);
   }
 
   .btn-ghost {
@@ -3415,8 +3363,6 @@
     border: 1px solid var(--border-med);
     transition: background var(--dur-1), color var(--dur-1), border-color var(--dur-1), transform var(--dur-1) var(--ease-spring);
     white-space: nowrap;
-    backdrop-filter: blur(10px);
-    -webkit-backdrop-filter: blur(10px);
   }
 
   .chip:active {
@@ -3525,8 +3471,6 @@
     min-height: 44px;
     margin: 8px 16px 0;
     border: 1px solid var(--border-med);
-    backdrop-filter: blur(20px);
-    -webkit-backdrop-filter: blur(20px);
   }
 
   .search-wrap:focus-within {
@@ -3677,8 +3621,6 @@
     overflow: hidden;
     gap: 0;
     isolation: isolate;
-    backdrop-filter: blur(20px);
-    -webkit-backdrop-filter: blur(20px);
   }
 
   .flashcard::before {
@@ -3872,19 +3814,16 @@
   .rate-btn.hard {
     background: linear-gradient(160deg, rgba(224, 80, 96, 0.90), rgba(192, 57, 43, 0.90));
     box-shadow: 0 4px 20px rgba(192, 57, 43, 0.30);
-    backdrop-filter: blur(10px);
   }
 
   .rate-btn.ok {
     background: linear-gradient(160deg, rgba(232, 168, 64, 0.90), rgba(192, 122, 30, 0.90));
     box-shadow: 0 4px 20px rgba(192, 122, 30, 0.30);
-    backdrop-filter: blur(10px);
   }
 
   .rate-btn.easy {
     background: linear-gradient(160deg, rgba(46, 201, 138, 0.90), rgba(15, 133, 86, 0.90));
     box-shadow: 0 4px 20px rgba(15, 133, 86, 0.35);
-    backdrop-filter: blur(10px);
   }
 
   /* Summary */
@@ -3896,8 +3835,6 @@
     text-align: center;
     box-shadow: var(--s-card);
     border: 1px solid var(--border);
-    backdrop-filter: blur(20px);
-    -webkit-backdrop-filter: blur(20px);
   }
 
   .summary-emoji {
@@ -3967,8 +3904,6 @@
     background: var(--surface);
     box-shadow: var(--s-card);
     border: 1px solid var(--border);
-    backdrop-filter: blur(20px);
-    -webkit-backdrop-filter: blur(20px);
   }
 
   .kpi .kpi-label {
@@ -4011,8 +3946,6 @@
     padding: 18px;
     box-shadow: var(--s-card);
     border: 1px solid var(--border);
-    backdrop-filter: blur(20px);
-    -webkit-backdrop-filter: blur(20px);
   }
 
   .heatmap {
@@ -4381,8 +4314,6 @@
     overflow: hidden;
     box-shadow: var(--s-card);
     border: 1px solid var(--border);
-    backdrop-filter: blur(20px);
-    -webkit-backdrop-filter: blur(20px);
   }
 
   .settings-toggle {
@@ -4457,8 +4388,6 @@
     margin: 0 16px;
     box-shadow: var(--s-card);
     border: 1px solid var(--border);
-    backdrop-filter: blur(20px);
-    -webkit-backdrop-filter: blur(20px);
   }
 
   .unit-info-card .ui-row {
@@ -4567,8 +4496,6 @@
     box-shadow: var(--s-card);
     border: 1px solid var(--border);
     color: var(--text);
-    backdrop-filter: blur(20px);
-    -webkit-backdrop-filter: blur(20px);
   }
 
   .lesson-explain {
@@ -4609,8 +4536,6 @@
     text-align: center;
     box-shadow: var(--s-card);
     border: 1px solid var(--border);
-    backdrop-filter: blur(20px);
-    -webkit-backdrop-filter: blur(20px);
   }
 
   .lesson-card-num {
@@ -4648,8 +4573,6 @@
     margin-bottom: 10px;
     box-shadow: var(--s-card);
     border: 1px solid var(--border);
-    backdrop-filter: blur(20px);
-    -webkit-backdrop-filter: blur(20px);
   }
 
   .lesson-section-title {
@@ -4730,8 +4653,6 @@
     box-shadow: var(--s-card);
     border: 1px solid var(--border);
     font-size: 13px;
-    backdrop-filter: blur(20px);
-    -webkit-backdrop-filter: blur(20px);
   }
 
   .lesson-table th {
@@ -4775,8 +4696,6 @@
     padding: 16px;
     margin-bottom: 12px;
     box-shadow: var(--s-card);
-    backdrop-filter: blur(20px);
-    -webkit-backdrop-filter: blur(20px);
   }
 
   .pr-q-num {
