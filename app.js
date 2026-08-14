@@ -5456,16 +5456,9 @@ function renderSettings() {
   const isDark = STATE.settings.theme === 'dark';
   $('#theme-toggle').classList.toggle('on', isDark);
   $('#theme-label').textContent = isDark ? 'Тёмная тема' : 'Светлая тема';
-  $('#gemini-key-input').value = STATE.settings?.geminiKey || '';
   const notifOn = !!STATE.settings?.notifications;
   $('#notif-toggle').classList.toggle('on', notifOn);
   $('#notif-label').textContent = notifOn ? 'Включены' : 'Выключены';
-}
-function saveGeminiKey() {
-  const key = $('#gemini-key-input').value.trim();
-  STATE.settings.geminiKey = key;
-  saveState();
-  toast(key ? 'Ключ сохранён' : 'Ключ удалён');
 }
 
 /* ===== THEME ==================================================== */
@@ -5654,7 +5647,6 @@ document.addEventListener('click', e => {
     case 'export-data': exportData(); break;
     case 'import-data': importData(); break;
     case 'reset-data': resetData(); break;
-    case 'save-gemini-key': saveGeminiKey(); break;
     case 'coming-soon': toast('Скоро'); break;
     case 'go-books': navigate('s-books'); break;
 case 'go-search': navigate('s-search'); break;
