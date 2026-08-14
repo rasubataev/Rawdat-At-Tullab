@@ -144,7 +144,7 @@
     --font-ui: -apple-system, BlinkMacSystemFont, "SF Pro Text", system-ui, "Segoe UI", Roboto, sans-serif;
     --font-display: -apple-system, BlinkMacSystemFont, "SF Pro Display", system-ui, "Segoe UI", Roboto, sans-serif;
     --font-ar: "Tajawal", "SF Arabic", "Noto Naskh Arabic", "Amiri", serif;
-    --font-ar-classic: "SF Arabic", "Geeza Pro", "Noto Naskh Arabic", "Amiri", serif;
+    --font-ar-classic: -apple-system, BlinkMacSystemFont, "SF Pro Text", system-ui, "Segoe UI", Roboto, sans-serif;
     --font-mono: "SF Mono", "Fira Code", monospace;
 
     /* Safe areas */
