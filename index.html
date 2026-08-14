@@ -22,9 +22,12 @@
 
   <section id="s-home" class="screen">
     <div style="padding: calc(env(safe-area-inset-top, 0px) + 12px) 20px 6px; display:flex; align-items:center; justify-content:space-between;">
-      <div style="display:flex;flex-direction:column;gap:1px">
-        <div style="font-size:11px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:var(--text-3)">Добро пожаловать</div>
-        <div style="font-family:var(--font-ar);font-size:22px;font-weight:800;direction:rtl;color:var(--brand-600);letter-spacing:-0.01em">روضة الطلاب</div>
+      <div style="display:flex;align-items:center;gap:10px">
+        <img src="icons/logo.PNG" alt="" style="width:38px;height:38px;border-radius:11px;object-fit:cover;box-shadow:0 2px 8px rgba(0,0,0,0.15)">
+        <div style="display:flex;flex-direction:column;gap:1px">
+          <div style="font-size:11px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:var(--text-3)">Добро пожаловать</div>
+          <div style="font-family:var(--font-ar);font-size:22px;font-weight:800;direction:rtl;color:var(--brand-600);letter-spacing:-0.01em">روضة الطلاب</div>
+        </div>
       </div>
     <button type="button" class="icon-btn" data-act="toggle-theme" aria-label="Тема">
   <svg viewBox="0 0 24 24" width="17" height="17"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg>
@@ -480,6 +483,19 @@
   </div>
 </div>
 
+<div class="section-head" style="padding-top:16px"><span class="eyebrow">Уведомления</span></div>
+<div class="list-group">
+  <div class="settings-toggle">
+    <div>
+      <div style="font-size:16px;font-weight:500" id="notif-label">Выключены</div>
+      <div class="muted">Напомнить, когда есть слова к повторению</div>
+    </div>
+    <div class="toggle-track" id="notif-toggle" onclick="toggleNotifications()">
+      <div class="toggle-thumb"></div>
+    </div>
+  </div>
+</div>
+
 <div class="section-head" style="padding-top:16px"><span class="eyebrow">Переводчик</span></div>
 <div class="list-group" style="padding:14px 16px">
   <div class="field">
@@ -490,6 +506,17 @@
     Нужен для переводчика AR ↔ RU. Получить бесплатный ключ: <a href="https://aistudio.google.com/apikey" target="_blank" rel="noopener">aistudio.google.com/apikey</a>. Хранится только в этом браузере.
   </div>
   <button type="button" class="btn btn-secondary" data-act="save-gemini-key">Сохранить ключ</button>
+</div>
+
+<div class="section-head" style="padding-top:16px"><span class="eyebrow">Обратная связь</span></div>
+<div class="list-group" style="padding:14px 16px">
+  <div class="muted" style="font-size:12.5px;line-height:1.5;margin-bottom:12px">
+    Нашёл ошибку или хочешь предложить, что добавить в приложение? Напиши напрямую разработчику.
+  </div>
+  <a class="btn btn-secondary" style="display:flex;text-decoration:none" href="mailto:rbataev15@outlook.com?subject=Rawdat%20At-Tullab%20%E2%80%94%20%D0%9E%D1%82%D0%B7%D1%8B%D0%B2">
+    <svg viewBox="0 0 24 24" style="width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;margin-right:6px"><path d="M4 4h16v16H4z"/><path d="m22 6-10 7L2 6"/></svg>
+    Написать разработчику
+  </a>
 </div>
 
 <div class="section-head" style="padding-top:16px"><span class="eyebrow">Данные</span></div>
