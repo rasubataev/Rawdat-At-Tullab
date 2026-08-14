@@ -5091,9 +5091,14 @@ function renderLearn() {
       <div class="li-body"><div class="li-title">Мои колоды</div><div class="li-sub">Личные наборы слов</div></div>
       <div class="li-trail"><span style="font-weight:600;color:var(--text-3)">${Object.keys(STATE.decks).length}</span><svg viewBox="0 0 24 24"><path d="M9 6l6 6-6 6"/></svg></div>
     </button>
-   <button type="button" class="list-item" data-go="s-translate">
+   <button type="button" class="list-item" data-act="coming-soon">
       <div class="li-icon ico-brand"><svg viewBox="0 0 24 24"><path d="M3 5h12M9 3v2M5 8l4 4M21 12l-4 4m0 0l4 4m-4-4H7"/></svg></div>
       <div class="li-body"><div class="li-title">Переводчик</div><div class="li-sub">AR ↔ RU</div></div>
+      <div class="li-trail"><svg viewBox="0 0 24 24"><path d="M9 6l6 6-6 6"/></svg></div>
+    </button>
+    <button type="button" class="list-item" data-act="coming-soon">
+      <div class="li-icon ico-purple"><svg viewBox="0 0 24 24"><path d="M4 6h16M4 12h10M4 18h16"/></svg></div>
+      <div class="li-body"><div class="li-title">Грамматический разбор</div><div class="li-sub">И'раб слов и предложений</div></div>
       <div class="li-trail"><svg viewBox="0 0 24 24"><path d="M9 6l6 6-6 6"/></svg></div>
     </button>
   </div>`;
@@ -5591,6 +5596,7 @@ document.addEventListener('click', e => {
     case 'import-data': importData(); break;
     case 'reset-data': resetData(); break;
     case 'save-gemini-key': saveGeminiKey(); break;
+    case 'coming-soon': toast('Скоро'); break;
     case 'go-books': navigate('s-books'); break;
 case 'go-search': navigate('s-search'); break;
 case 'open-mix': navigate('s-mix'); break;
