@@ -1,8 +1,8 @@
 {
   "name": "Rawdat At-Tullab",
   "short_name": "Rawdat",
-  "start_url": "/Rawdat-At-Tullab/",
-  "scope": "/Rawdat-At-Tullab/",
+  "start_url": "/",
+  "scope": "/",
   "display": "standalone",
   "orientation": "portrait",
   "background_color": "#F5F5F0",
