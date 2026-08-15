@@ -542,7 +542,7 @@
   </button>
 </div>
 
-<div style="padding:28px 20px 0;text-align:center">
+<div style="padding:28px 20px 0;text-align:center" data-act="version-tap">
   <div style="font-family:var(--font-ar);font-size:24px;font-weight:800;color:var(--brand-600);margin-bottom:6px;direction:rtl">روضة الطلاب</div>
   <div style="font-size:12px;color:var(--text-3);font-weight:500">Rawdat At-Tullab · v3.0</div>
 </div>
@@ -664,6 +664,27 @@
     <input type="file" id="pdf-upload-input" accept="application/pdf,.pdf" style="display:none">
   </div>
   <div id="pdf-library-list"></div>
+</section>
+<section id="s-admin" class="screen hidden">
+  <div class="topbar">
+    <button type="button" class="icon-btn" data-back>
+      <svg viewBox="0 0 24 24"><path d="M15 6l-6 6 6 6"/></svg>
+    </button>
+    <span class="topbar-title">Админ · Общая библиотека</span>
+    <button type="button" class="icon-btn" data-act="admin-logout" aria-label="Выйти">
+      <svg viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/></svg>
+    </button>
+  </div>
+  <div style="padding:0 16px 14px">
+    <div class="field"><label>Название книги</label><input class="input" id="admin-upload-title" placeholder="Например: Сафинат ан-Наджа" autocomplete="off"></div>
+    <input type="file" id="admin-upload-file" accept="application/pdf,.pdf" style="margin:8px 0 12px;display:block">
+    <button type="button" class="btn btn-primary" data-act="admin-upload">
+      <svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>
+      Добавить для всех пользователей
+    </button>
+  </div>
+  <div class="section-head"><span class="eyebrow">Уже добавлено</span></div>
+  <div id="admin-list"></div>
 </section>
 <section id="s-practice" class="screen hidden">
   <div class="topbar">
