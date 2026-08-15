@@ -644,7 +644,7 @@
     <div style="width:38px"></div>
   </div>
   <div class="pdf-frame-wrap">
-    <iframe id="pdf-frame" title="PDF" src=""></iframe>
+    <div id="pdf-pages" class="pdf-pages"></div>
   </div>
 </section>
 <section id="s-pdf-library" class="screen hidden">
@@ -705,7 +705,7 @@
   <div style="padding:16px">
     <textarea class="input" id="irab-input" dir="rtl" placeholder="أدخل الجملة أو الكلمة..." style="min-height:80px;font-size:20px;font-family:var(--font-ar-classic)"></textarea>
     <button type="button" class="btn btn-primary" style="margin-top:10px" data-act="do-irab">Разобрать</button>
-    <div id="irab-result" dir="rtl" style="margin-top:16px;font-size:19px;line-height:1.9;font-family:var(--font-ar-classic);text-align:right;white-space:pre-wrap;color:var(--text)"</div>
+    <div id="irab-result" dir="rtl" style="margin-top:16px;font-size:19px;line-height:1.9;font-family:var(--font-ar-classic);text-align:right;white-space:pre-wrap;color:var(--text)"></div>
   </div>
 </section>
 <section id="s-sarf" class="screen hidden">
@@ -720,12 +720,13 @@
   <div style="padding:16px">
     <textarea class="input" id="sarf-input" dir="rtl" placeholder="أدخل الكلمة..." style="min-height:80px;font-size:20px;font-family:var(--font-ar-classic)"></textarea>
     <button type="button" class="btn btn-primary" style="margin-top:10px" data-act="do-sarf">Разобрать</button>
-    <div id="sarf-result" dir="rtl" style="margin-top:16px;font-size:19px;line-height:1.9;font-family:var(--font-ar-classic);text-align:right;white-space:pre-wrap;color:var(--text)"</div>
+    <div id="sarf-result" dir="rtl" style="margin-top:16px;font-size:19px;line-height:1.9;font-family:var(--font-ar-classic);text-align:right;white-space:pre-wrap;color:var(--text)"></div>
   </div>
 </section>
 </div><!-- /.app -->
 <div class="toast" id="toast"></div>
 
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.7.76/pdf.min.js"></script>
 <script src="app.js"></script>
 
 </body>
