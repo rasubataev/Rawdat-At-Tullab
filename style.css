@@ -2124,7 +2124,7 @@
   .quick-tools-row {
     display: flex;
     gap: 12px;
-    padding: 2px 20px 4px;
+    padding: 20px 20px 4px;
   }
 
   .quick-tool-btn {
@@ -4495,7 +4495,7 @@
   .quick-tools-row {
     display: flex;
     gap: 12px;
-    padding: 2px 20px 4px;
+    padding: 20px 20px 4px;
   }
 
   .quick-tool-btn {
