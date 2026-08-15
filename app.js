@@ -5217,9 +5217,6 @@ function renderBooks() {
 
 let BOOK_ID = null, PART_ID = null, UNIT_ID = null;
 let PDF_BOOK_ID = null, PDF_SOURCE = 'book', PDF_OBJ_URL = null, PDF_DOC = null, PDF_OBSERVER = null;
-if (window.pdfjsLib) {
-  pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.7.76/pdf.worker.min.js';
-}
 
 /* ===== USER PDF LIBRARY (IndexedDB, unlimited by us — only device storage limits) === */
 const PDF_DB_NAME = 'dhp-pdfs', PDF_DB_STORE = 'files';
