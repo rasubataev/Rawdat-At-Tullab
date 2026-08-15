@@ -72,6 +72,22 @@
   </div>
 </div>
 
+<!-- Quick Tools -->
+<div class="quick-tools-row">
+  <button type="button" class="quick-tool-btn qt-brand" data-act="open-translate">
+    <div class="quick-tool-icon"><svg viewBox="0 0 24 24"><path d="M3 5h12M9 3v2M5 8l4 4M21 12l-4 4m0 0l4 4m-4-4H7"/></svg></div>
+    <span class="quick-tool-label">Переводчик</span>
+  </button>
+  <button type="button" class="quick-tool-btn qt-purple" data-act="open-irab">
+    <div class="quick-tool-icon"><svg viewBox="0 0 24 24"><path d="M4 6h16M4 12h10M4 18h16"/></svg></div>
+    <span class="quick-tool-label">И'раб</span>
+  </button>
+  <button type="button" class="quick-tool-btn qt-orange" data-act="open-sarf">
+    <div class="quick-tool-icon"><svg viewBox="0 0 24 24"><path d="M4 4h16v4H4zM4 10h10v4H4zM4 16h16v4H4z"/></svg></div>
+    <span class="quick-tool-label">Сарф</span>
+  </button>
+</div>
+
 <!-- Library -->
 <div class="section-head">
   <span class="eyebrow">Библиотека</span>
@@ -675,6 +691,36 @@
     <textarea class="input" id="tr-input" placeholder="Введи слово..." style="min-height:80px;font-size:18px"></textarea>
     <button type="button" class="btn btn-primary" style="margin-top:10px" data-act="do-translate">Перевести</button>
     <div id="tr-result" style="margin-top:16px;font-size:20px;font-family:var(--font-ar-classic);text-align:center;min-height:40px;color:var(--brand-600);font-weight:700"></div>
+  </div>
+</section>
+<section id="s-irab" class="screen hidden">
+  <div class="topbar">
+    <button type="button" class="icon-btn" data-back>
+      <svg viewBox="0 0 24 24"><path d="M15 6l-6 6 6 6"/></svg>
+    </button>
+    <span class="topbar-title">Грамматический разбор</span>
+    <div style="width:38px"></div>
+  </div>
+
+  <div style="padding:16px">
+    <textarea class="input" id="irab-input" dir="rtl" placeholder="أدخل الجملة أو الكلمة..." style="min-height:80px;font-size:20px;font-family:var(--font-ar-classic)"></textarea>
+    <button type="button" class="btn btn-primary" style="margin-top:10px" data-act="do-irab">Разобрать</button>
+    <div id="irab-result" dir="rtl" style="margin-top:16px;font-size:19px;line-height:1.9;font-family:var(--font-ar-classic);text-align:right;white-space:pre-wrap;color:var(--text)"</div>
+  </div>
+</section>
+<section id="s-sarf" class="screen hidden">
+  <div class="topbar">
+    <button type="button" class="icon-btn" data-back>
+      <svg viewBox="0 0 24 24"><path d="M15 6l-6 6 6 6"/></svg>
+    </button>
+    <span class="topbar-title">Сарф</span>
+    <div style="width:38px"></div>
+  </div>
+
+  <div style="padding:16px">
+    <textarea class="input" id="sarf-input" dir="rtl" placeholder="أدخل الكلمة..." style="min-height:80px;font-size:20px;font-family:var(--font-ar-classic)"></textarea>
+    <button type="button" class="btn btn-primary" style="margin-top:10px" data-act="do-sarf">Разобрать</button>
+    <div id="sarf-result" dir="rtl" style="margin-top:16px;font-size:19px;line-height:1.9;font-family:var(--font-ar-classic);text-align:right;white-space:pre-wrap;color:var(--text)"</div>
   </div>
 </section>
 </div><!-- /.app -->
