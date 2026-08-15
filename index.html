@@ -619,6 +619,35 @@
     </div>
   </div>
 </section>
+<section id="s-pdf" class="screen hidden">
+  <div class="topbar">
+    <button type="button" class="icon-btn" data-back>
+      <svg viewBox="0 0 24 24"><path d="M15 6l-6 6 6 6"/></svg>
+    </button>
+    <span class="topbar-title" id="pdf-title">--</span>
+    <div style="width:38px"></div>
+  </div>
+  <div class="pdf-frame-wrap">
+    <iframe id="pdf-frame" title="PDF" src=""></iframe>
+  </div>
+</section>
+<section id="s-pdf-library" class="screen hidden">
+  <div class="topbar">
+    <button type="button" class="icon-btn" data-back>
+      <svg viewBox="0 0 24 24"><path d="M15 6l-6 6 6 6"/></svg>
+    </button>
+    <span class="topbar-title">Мои PDF</span>
+    <div style="width:38px"></div>
+  </div>
+  <div style="padding:0 16px 14px">
+    <button type="button" class="btn btn-primary" data-act="pdf-upload-trigger">
+      <svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>
+      Добавить PDF с устройства
+    </button>
+    <input type="file" id="pdf-upload-input" accept="application/pdf,.pdf" style="display:none">
+  </div>
+  <div id="pdf-library-list"></div>
+</section>
 <section id="s-practice" class="screen hidden">
   <div class="topbar">
     <button type="button" class="icon-btn" data-back>
@@ -637,6 +666,7 @@
     <span class="topbar-title">Переводчик</span>
     <div style="width:38px"></div>
   </div>
+  
   <div style="padding:16px">
     <div class="segmented" style="margin:0 0 14px">
       <button type="button" class="seg on" data-act="tr-dir-ar">AR → RU</button>
