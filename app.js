@@ -5381,22 +5381,30 @@ async function renderPdfReader() {
   // открывается целиком, а не по мере прокрутки. Процент в шапке показывает,
   // что работа идёт, даже если на долистывание длинной книги нужно время.
   for (let i = 1; i <= doc.numPages; i++) {
-    const page = await doc.getPage(i);
-    if (myToken !== PDF_RENDER_TOKEN) return;
-    const baseVp = page.getViewport({ scale: 1 });
-    const viewport = page.getViewport({ scale: (containerWidth / baseVp.width) * dpr });
-    const canvas = document.createElement('canvas');
-    canvas.width = Math.ceil(viewport.width);
-    canvas.height = Math.ceil(viewport.height);
-    canvas.style.width = '100%';
-    canvas.style.display = 'block';
-    const wrap = document.createElement('div');
-    wrap.className = 'pdf-page';
-    wrap.appendChild(canvas);
-    if (i === 1) container.innerHTML = '';
-    container.appendChild(wrap);
-    try { await page.render({ canvasContext: canvas.getContext('2d'), viewport }).promise; }
-    catch (e) { console.error(e); }
+    // Каждая страница — в своём try/catch: если конкретная страница не смогла
+    // распарситься/отрисоваться (нехватка памяти, битые данные страницы и т.п.),
+    // раньше это тихо обрывало ВЕСЬ цикл необработанной ошибкой — книга
+    // застревала на первой странице. Теперь сбой одной страницы просто
+    // пропускается, а следующие страницы всё равно рендерятся.
+    try {
+      const page = await doc.getPage(i);
+      if (myToken !== PDF_RENDER_TOKEN) return;
+      const baseVp = page.getViewport({ scale: 1 });
+      const viewport = page.getViewport({ scale: (containerWidth / baseVp.width) * dpr });
+      const canvas = document.createElement('canvas');
+      canvas.width = Math.ceil(viewport.width);
+      canvas.height = Math.ceil(viewport.height);
+      canvas.style.width = '100%';
+      canvas.style.display = 'block';
+      const wrap = document.createElement('div');
+      wrap.className = 'pdf-page';
+      wrap.appendChild(canvas);
+      if (i === 1) container.innerHTML = '';
+      container.appendChild(wrap);
+      await page.render({ canvasContext: canvas.getContext('2d'), viewport }).promise;
+    } catch (e) {
+      console.error('PDF page ' + i + ' failed', e);
+    }
     if (myToken !== PDF_RENDER_TOKEN) return;
     if (doc.numPages > 1 && i < doc.numPages) {
       $('#pdf-title').textContent = `${bookTitle} · ${Math.round(i / doc.numPages * 100)}%`;
@@ -5405,10 +5413,17 @@ async function renderPdfReader() {
   if (myToken === PDF_RENDER_TOKEN) $('#pdf-title').textContent = bookTitle;
 }
 
-function openMyPdf(id) {
-  PDF_SOURCE = 'user';
-  PDF_BOOK_ID = id;
-  navigate('s-pdf');
+async function openMyPdf(id) {
+  // Не рендерим PDF сами — отдаём файл нативному просмотрщику браузера/ОС
+  // через blob-ссылку. Рендерингом занимается движок телефона, а не наш
+  // JS-цикл по canvas, поэтому багов с памятью и застреванием на первой
+  // странице здесь в принципе быть не может.
+  const rec = await pdfDbGet(id);
+  if (!rec) { toast('Файл не найден'); return; }
+  const url = URL.createObjectURL(rec.blob);
+  const win = window.open(url, '_blank');
+  if (!win) location.href = url;
+  setTimeout(() => URL.revokeObjectURL(url), 60000);
 }
 
 function openBook(id) {
