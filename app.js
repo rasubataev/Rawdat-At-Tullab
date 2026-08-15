@@ -5849,7 +5849,7 @@ function importData() {
       try {
         const p = JSON.parse(r.result);
         if (!p || !p.version) throw new Error('bad');
-        STATE = p; saveState(); applyTheme(STATE.settings?.theme || 'light');
+        STATE = p; saveState(); applyTheme(STATE.settings?.theme || 'dark');
         navigate('s-home', { stack: false }); renderHome(); toast('Импортировано');
       } catch(e) { toast('Неверный файл'); }
     };
@@ -9955,7 +9955,7 @@ function renderLesson() {
   $('#lesson-body').innerHTML = html;
   }
 
-applyTheme(STATE.settings?.theme || 'light');
+applyTheme(STATE.settings?.theme || 'dark');
 navigate('s-home', { stack: false });
 checkDueNotify();
 setInterval(() => checkDueNotify(), 10 * 60 * 1000);
