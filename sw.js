@@ -1,6 +1,6 @@
 // Service Worker — офлайн-режим Rawdat At-Tullab.
 // При обновлении файлов приложения меняй CACHE_VERSION, чтобы старый кэш очистился.
-const CACHE_VERSION = 'v1';
+const CACHE_VERSION = 'v2';
 const SHELL_CACHE = 'rawdat-shell-' + CACHE_VERSION;
 const RUNTIME_CACHE = 'rawdat-runtime-' + CACHE_VERSION;
 
@@ -43,6 +43,13 @@ self.addEventListener('fetch', (event) => {
   // Прокси для Claude API — никогда не кэшируем, всегда только сеть
   if (url.hostname.endsWith('.workers.dev')) return;
 
+  // PDF-файлы и запросы с диапазоном байт (Range) — не перехватываем, отдаём браузеру
+  // напрямую. PDF.js грузит книги кусками через Range-запросы, чтобы показать страницу
+  // сразу, не дожидаясь всего файла; если кэшировать такой ответ под обычным URL, следующий
+  // Range-запрос совпадёт с этим кэшем и вернёт не тот кусок — PDF.js откатится на загрузку
+  // файла целиком, и книга будет заметно дольше открываться.
+  if (url.pathname.endsWith('.pdf') || request.headers.has('range')) return;
+
   // Ядро приложения: сначала сеть (чтобы обновления доходили сразу), при офлайне — кэш
   if (url.origin === self.location.origin && (request.mode === 'navigate' || SHELL_FILES.includes(url.pathname))) {
     event.respondWith(networkFirst(request));
@@ -74,6 +81,10 @@ async function cacheFirst(request) {
   const cached = await cache.match(request);
   if (cached) return cached;
   const fresh = await fetch(request);
-  cache.put(request, fresh.clone());
+  // Кэшируем только полноценные ответы — частичный контент (206) Cache API не принимает,
+  // а ошибочные ответы кэшировать незачем.
+  if (fresh.ok && fresh.status === 200) {
+    cache.put(request, fresh.clone()).catch(() => {});
+  }
   return fresh;
 }
