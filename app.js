@@ -5217,6 +5217,7 @@ function renderBooks() {
 
 let BOOK_ID = null, PART_ID = null, UNIT_ID = null;
 let PDF_BOOK_ID = null, PDF_SOURCE = 'book', PDF_OBJ_URL = null, PDF_DOC = null, PDF_OBSERVER = null;
+let PDF_RENDER_TOKEN = 0;
 
 /* ===== USER PDF LIBRARY (IndexedDB, unlimited by us — only device storage limits) === */
 const PDF_DB_NAME = 'dhp-pdfs', PDF_DB_STORE = 'files';
@@ -5323,9 +5324,14 @@ function renderPdfLibrary() {
 }
 
 async function renderPdfReader() {
+  // Токен текущего вызова: если пока мы ждём (IndexedDB, разбор PDF, рендер страницы)
+  // пользователь открыл другую книгу, у неё будет свой токен, и этот вызов увидит,
+  // что он больше не актуальный, и тихо остановится — не тронув чужой контейнер/данные.
+  const myToken = ++PDF_RENDER_TOKEN;
+
   if (PDF_OBJ_URL) { URL.revokeObjectURL(PDF_OBJ_URL); PDF_OBJ_URL = null; }
   if (PDF_OBSERVER) { PDF_OBSERVER.disconnect(); PDF_OBSERVER = null; }
-  if (PDF_DOC) { PDF_DOC.destroy(); PDF_DOC = null; }
+  if (PDF_DOC) { PDF_DOC.destroy().catch(() => {}); PDF_DOC = null; }
 
   const container = $('#pdf-pages');
   container.innerHTML = `<div class="empty-state"><div class="es-title">Загрузка…</div></div>`;
@@ -5335,8 +5341,10 @@ async function renderPdfReader() {
     const meta = (STATE.myPdfs || []).find(p => p.id === PDF_BOOK_ID);
     $('#pdf-title').textContent = meta ? meta.name : 'PDF';
     const rec = await pdfDbGet(PDF_BOOK_ID);
+    if (myToken !== PDF_RENDER_TOKEN) return;
     if (!rec) { toast('Файл не найден'); back(); return; }
     src = { data: await rec.blob.arrayBuffer() };
+    if (myToken !== PDF_RENDER_TOKEN) return;
   } else {
     const b = findBook(PDF_BOOK_ID);
     if (!b) return;
@@ -5345,27 +5353,36 @@ async function renderPdfReader() {
   }
 
   if (!window.pdfjsLib) {
+    if (myToken !== PDF_RENDER_TOKEN) return;
     container.innerHTML = `<div class="empty-state"><div class="es-title">Не удалось загрузить PDF-модуль</div><div class="es-text">Проверь подключение к интернету</div></div>`;
     return;
   }
 
+  let doc;
   try {
-    PDF_DOC = await pdfjsLib.getDocument(src).promise;
+    doc = await pdfjsLib.getDocument(src).promise;
   } catch (e) {
     console.error(e);
+    if (myToken !== PDF_RENDER_TOKEN) return;
     container.innerHTML = `<div class="empty-state"><div class="es-title">Не удалось открыть PDF</div></div>`;
     return;
   }
+  if (myToken !== PDF_RENDER_TOKEN) { doc.destroy().catch(() => {}); return; }
+  PDF_DOC = doc;
 
-  container.innerHTML = '';
-  const dpr = Math.min(window.devicePixelRatio || 1, 2);
+  // У длинных книг снижаем масштаб рендера (без этого сотни полноразмерных
+  // страниц разом упираются в память телефона) — короткие книги остаются
+  // в полном качестве.
+  const dpr = doc.numPages > 80 ? 1 : Math.min(window.devicePixelRatio || 1, 2);
   const containerWidth = container.clientWidth;
+  const bookTitle = $('#pdf-title').textContent;
 
-  // Рендерим сразу все страницы по порядку — без предварительного прохода
-  // для замера высоты и без ожидания прокрутки. Память расходуется больше,
-  // зато первая страница (и все следующие) появляются мгновенно, как раньше.
-  for (let i = 1; i <= PDF_DOC.numPages; i++) {
-    const page = await PDF_DOC.getPage(i);
+  // Рендерим все страницы по порядку и сразу добавляем в контейнер — книга
+  // открывается целиком, а не по мере прокрутки. Процент в шапке показывает,
+  // что работа идёт, даже если на долистывание длинной книги нужно время.
+  for (let i = 1; i <= doc.numPages; i++) {
+    const page = await doc.getPage(i);
+    if (myToken !== PDF_RENDER_TOKEN) return;
     const baseVp = page.getViewport({ scale: 1 });
     const viewport = page.getViewport({ scale: (containerWidth / baseVp.width) * dpr });
     const canvas = document.createElement('canvas');
@@ -5376,10 +5393,16 @@ async function renderPdfReader() {
     const wrap = document.createElement('div');
     wrap.className = 'pdf-page';
     wrap.appendChild(canvas);
+    if (i === 1) container.innerHTML = '';
     container.appendChild(wrap);
     try { await page.render({ canvasContext: canvas.getContext('2d'), viewport }).promise; }
     catch (e) { console.error(e); }
+    if (myToken !== PDF_RENDER_TOKEN) return;
+    if (doc.numPages > 1 && i < doc.numPages) {
+      $('#pdf-title').textContent = `${bookTitle} · ${Math.round(i / doc.numPages * 100)}%`;
+    }
   }
+  if (myToken === PDF_RENDER_TOKEN) $('#pdf-title').textContent = bookTitle;
 }
 
 function openMyPdf(id) {
