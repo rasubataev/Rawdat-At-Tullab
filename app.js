@@ -5008,6 +5008,7 @@ function navigate(screenId, { stack = true } = {}) {
     's-books': 'learn', 's-parts': 'learn', 's-units': 'learn', 's-unit': 'learn',
     's-decks': 'learn', 's-deck': 'learn',
     's-hard': 'learn', 's-mix': 'learn', 's-search': 'learn', 's-pdf': 'learn', 's-pdf-library': 'learn',
+    's-translate': 'learn', 's-irab': 'learn', 's-sarf': 'learn',
     's-stats': 'stats', 's-settings': 'settings',
   };
   const tab = tabMap[screenId] || '';
@@ -5030,6 +5031,8 @@ function runScreenRender(id) {
   switch (id) {
     case 's-home': renderHome(); break;
     case 's-translate': break;
+    case 's-irab': break;
+    case 's-sarf': break;
     case 's-practice': renderPractice(); break;
     case 's-learn': renderLearn(); break;
     case 's-books': renderBooks(); break;
@@ -5160,17 +5163,17 @@ function renderLearn() {
 
   <div class="section-head" style="margin-top:8px"><span class="eyebrow">Инструменты</span></div>
   <div class="list-group" style="margin:0 16px">
-    <button type="button" class="list-item" data-act="coming-soon">
+    <button type="button" class="list-item" data-act="open-translate">
       <div class="li-icon ico-brand"><svg viewBox="0 0 24 24"><path d="M3 5h12M9 3v2M5 8l4 4M21 12l-4 4m0 0l4 4m-4-4H7"/></svg></div>
       <div class="li-body"><div class="li-title">Переводчик</div><div class="li-sub">AR ↔ RU</div></div>
       <div class="li-trail"><svg viewBox="0 0 24 24"><path d="M9 6l6 6-6 6"/></svg></div>
     </button>
-    <button type="button" class="list-item" data-act="coming-soon">
+    <button type="button" class="list-item" data-act="open-irab">
       <div class="li-icon ico-purple"><svg viewBox="0 0 24 24"><path d="M4 6h16M4 12h10M4 18h16"/></svg></div>
       <div class="li-body"><div class="li-title">Грамматический разбор</div><div class="li-sub">И'раб слов и предложений</div></div>
       <div class="li-trail"><svg viewBox="0 0 24 24"><path d="M9 6l6 6-6 6"/></svg></div>
     </button>
-    <button type="button" class="list-item" data-act="coming-soon">
+    <button type="button" class="list-item" data-act="open-sarf">
       <div class="li-icon ico-orange"><svg viewBox="0 0 24 24"><path d="M4 4h16v4H4zM4 10h10v4H4zM4 16h16v4H4z"/></svg></div>
       <div class="li-body"><div class="li-title">Сарф</div><div class="li-sub">Морфологический разбор слов</div></div>
       <div class="li-trail"><svg viewBox="0 0 24 24"><path d="M9 6l6 6-6 6"/></svg></div>
@@ -5852,6 +5855,27 @@ case 'pr-pick': {
   if (PR_CHECKED) break;
   PR_ANSWERS[parseInt(t.dataset.qi, 10)] = parseInt(t.dataset.oi, 10);
   renderPractice();
+  break;
+}
+case 'open-translate': navigate('s-translate'); break;
+case 'open-irab': navigate('s-irab'); break;
+case 'open-sarf': navigate('s-sarf'); break;
+case 'do-irab': {
+  const text = $('#irab-input').value.trim();
+  if (!text) { toast('Введи текст'); break; }
+  $('#irab-result').textContent = '...';
+  analyzeIrab(text).then(res => {
+    $('#irab-result').textContent = res || 'Не удалось выполнить разбор';
+  });
+  break;
+}
+case 'do-sarf': {
+  const text = $('#sarf-input').value.trim();
+  if (!text) { toast('Введи текст'); break; }
+  $('#sarf-result').textContent = '...';
+  analyzeSarf(text).then(res => {
+    $('#sarf-result').textContent = res || 'Не удалось выполнить разбор';
+  });
   break;
 }
 case 'do-translate': {
@@ -9874,24 +9898,34 @@ navigate('s-home', { stack: false });
 checkDueNotify();
 setInterval(() => checkDueNotify(), 10 * 60 * 1000);
 document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible') checkDueNotify(); });
-async function translateWord(text, toLang = 'ru') {
+const TRANSLATE_PROXY_URL = 'https://rawdat-tullab.z7gf59b4cn.workers.dev';
+
+async function callClaudeProxy(text, mode) {
   if (!text) return null;
-  const key = STATE.settings?.geminiKey;
-  if (!key) { toast('Добавь Gemini API ключ в Настройках'); return null; }
-  const prompt = toLang === 'ru'
-    ? `Переведи арабское слово или фразу на русский. Только перевод, без пояснений: ${text}`
-    : `Переведи русское слово или фразу на арабский. Только арабский перевод, без пояснений: ${text}`;
   try {
-    const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${encodeURIComponent(key)}`, {
+    const res = await fetch(TRANSLATE_PROXY_URL, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] })
+      body: JSON.stringify({ text, mode })
     });
     const data = await res.json();
-    if (data.error) { toast(data.error.message || 'Ошибка перевода'); return null; }
-    return data.candidates?.[0]?.content?.parts?.[0]?.text?.trim() || null;
+    if (data.error) { toast(data.error.message || 'Ошибка'); return null; }
+    const block = data.content?.find(b => b.type === 'text');
+    return block?.text?.trim() || null;
   } catch(e) {
-    toast('Ошибка перевода');
+    toast('Ошибка соединения');
     return null;
   }
+}
+
+async function translateWord(text, toLang = 'ru') {
+  return callClaudeProxy(text, 'translate');
+}
+
+async function analyzeIrab(text) {
+  return callClaudeProxy(text, 'irab');
+}
+
+async function analyzeSarf(text) {
+  return callClaudeProxy(text, 'sarf');
 }
