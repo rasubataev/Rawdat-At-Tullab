@@ -5025,7 +5025,7 @@ function navigate(screenId, { stack = true } = {}) {
     's-home': 'home', 's-learn': 'learn',
     's-books': 'learn', 's-parts': 'learn', 's-units': 'learn', 's-unit': 'learn',
     's-decks': 'learn', 's-deck': 'learn',
-    's-hard': 'learn', 's-mix': 'learn', 's-search': 'learn', 's-pdf': 'learn',
+    's-hard': 'learn', 's-mix': 'learn', 's-search': 'learn', 's-pdf': 'learn', 's-pdf-library': 'learn',
     's-stats': 'stats', 's-settings': 'settings',
   };
   const tab = tabMap[screenId] || '';
@@ -5063,6 +5063,7 @@ function runScreenRender(id) {
     case 's-settings': renderSettings(); break;
     case 's-lesson': renderLesson(); break;
     case 's-pdf': renderPdfReader(); break;
+    case 's-pdf-library': renderPdfLibrary(); break;
   }
  
 }
@@ -5168,6 +5169,11 @@ function renderLearn() {
       <div class="li-body"><div class="li-title">Мои колоды</div><div class="li-sub">Личные наборы слов</div></div>
       <div class="li-trail"><span style="font-weight:600;color:var(--text-3)">${Object.keys(STATE.decks).length}</span><svg viewBox="0 0 24 24"><path d="M9 6l6 6-6 6"/></svg></div>
     </button>
+    <button type="button" class="list-item" data-act="open-pdf-library">
+      <div class="li-icon ico-orange"><svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/></svg></div>
+      <div class="li-body"><div class="li-title">Мои PDF</div><div class="li-sub">Загружай книги прямо с телефона</div></div>
+      <div class="li-trail"><span style="font-weight:600;color:var(--text-3)">${(STATE.myPdfs || []).length + BOOKS.filter(b => b.isPdf).length}</span><svg viewBox="0 0 24 24"><path d="M9 6l6 6-6 6"/></svg></div>
+    </button>
   </div>
 
   <div class="section-head" style="margin-top:8px"><span class="eyebrow">Инструменты</span></div>
@@ -5195,7 +5201,7 @@ function renderLearn() {
 /* BOOKS */
 function renderBooks() {
   $('#books-list').innerHTML = `<div class="tile-grid" style="margin:12px 16px">` +
-  BOOKS.map(b => {
+  BOOKS.filter(b => !b.isPdf).map(b => {
     const locked = !!b.locked;
     const units = (b.parts || []).flatMap(p => p.units || []);
     const totalW = units.reduce((s, u) => s + (u.words?.length || 0), 0);
@@ -5217,20 +5223,143 @@ function renderBooks() {
 }
 
 
-let BOOK_ID = null, PART_ID = null, UNIT_ID = null, PDF_BOOK_ID = null;
+let BOOK_ID = null, PART_ID = null, UNIT_ID = null;
+let PDF_BOOK_ID = null, PDF_SOURCE = 'book', PDF_OBJ_URL = null;
+
+/* ===== USER PDF LIBRARY (IndexedDB, unlimited by us — only device storage limits) === */
+const PDF_DB_NAME = 'dhp-pdfs', PDF_DB_STORE = 'files';
+function openPdfDB() {
+  return new Promise((resolve, reject) => {
+    const req = indexedDB.open(PDF_DB_NAME, 1);
+    req.onupgradeneeded = () => { req.result.createObjectStore(PDF_DB_STORE, { keyPath: 'id' }); };
+    req.onsuccess = () => resolve(req.result);
+    req.onerror = () => reject(req.error);
+  });
+}
+function pdfDbPut(record) {
+  return openPdfDB().then(db => new Promise((resolve, reject) => {
+    const tx = db.transaction(PDF_DB_STORE, 'readwrite');
+    tx.objectStore(PDF_DB_STORE).put(record);
+    tx.oncomplete = () => resolve();
+    tx.onerror = () => reject(tx.error);
+  }));
+}
+function pdfDbGet(id) {
+  return openPdfDB().then(db => new Promise((resolve, reject) => {
+    const req = db.transaction(PDF_DB_STORE, 'readonly').objectStore(PDF_DB_STORE).get(id);
+    req.onsuccess = () => resolve(req.result);
+    req.onerror = () => reject(req.error);
+  }));
+}
+function pdfDbDelete(id) {
+  return openPdfDB().then(db => new Promise((resolve, reject) => {
+    const tx = db.transaction(PDF_DB_STORE, 'readwrite');
+    tx.objectStore(PDF_DB_STORE).delete(id);
+    tx.oncomplete = () => resolve();
+    tx.onerror = () => reject(tx.error);
+  }));
+}
+
+function handlePdfUpload(fileList) {
+  const file = fileList && fileList[0];
+  if (!file) return;
+  const isPdf = file.type === 'application/pdf' || /\.pdf$/i.test(file.name);
+  if (!isPdf) { toast('Выбери файл в формате PDF'); return; }
+  const id = 'updf_' + Math.random().toString(36).slice(2, 10);
+  file.arrayBuffer().then(buf => pdfDbPut({ id, blob: new Blob([buf], { type: 'application/pdf' }) }))
+    .then(() => {
+      if (!STATE.myPdfs) STATE.myPdfs = [];
+      STATE.myPdfs.unshift({ id, name: file.name.replace(/\.pdf$/i, ''), size: file.size, addedAt: now() });
+      saveState();
+      renderPdfLibrary();
+      toast('Книга добавлена');
+    })
+    .catch(e => { console.error(e); toast('Не удалось сохранить файл — не хватает места на устройстве'); });
+}
+
+function deleteMyPdf(id) {
+  if (!confirm('Удалить эту книгу?')) return;
+  pdfDbDelete(id).finally(() => {
+    STATE.myPdfs = (STATE.myPdfs || []).filter(p => p.id !== id);
+    saveState();
+    renderPdfLibrary();
+    toast('Удалено');
+  });
+}
+
+function fmtBytes(n) {
+  if (n < 1024) return n + ' Б';
+  if (n < 1024 * 1024) return Math.round(n / 1024) + ' КБ';
+  return (n / (1024 * 1024)).toFixed(1) + ' МБ';
+}
+
+function renderPdfLibrary() {
+  const builtIn = BOOKS.filter(b => b.isPdf);
+  const mine = STATE.myPdfs || [];
+  let html = '';
+
+  if (builtIn.length) {
+    html += `<div class="section-head"><span class="eyebrow">Книги для чтения</span></div>
+    <div class="list-group" style="margin:0 16px">${builtIn.map(b => `
+      <button type="button" class="list-item" data-act="open-book" data-book="${b.id}">
+        <div class="li-icon ico-brand"><svg viewBox="0 0 24 24"><path d="M4 5a2 2 0 0 1 2-2h12v18H6a2 2 0 0 1-2-2zM8 3v18"/></svg></div>
+        <div class="li-body"><div class="li-title">${esc(b.title)}</div><div class="li-sub" style="direction:rtl;font-family:var(--font-ar)">${esc(b.ar)}</div></div>
+        <div class="li-trail"><svg viewBox="0 0 24 24"><path d="M9 6l6 6-6 6"/></svg></div>
+      </button>
+    `).join('')}</div>`;
+  }
+
+  html += `<div class="section-head" style="margin-top:8px"><span class="eyebrow">Мои PDF</span></div>`;
+
+  if (!mine.length) {
+    html += `<div class="empty-state"><div class="es-icon"><svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6M12 18v-6M9 15h6"/></svg></div><div class="es-title">Пока пусто</div><div class="es-text">Добавь свою первую PDF-книгу кнопкой + вверху</div></div>`;
+  } else {
+    html += `<div class="list-group" style="margin:0 16px">${mine.map(p => `
+      <div class="list-item" style="padding-right:10px">
+        <button type="button" data-act="open-my-pdf" data-id="${p.id}" style="all:unset;display:flex;align-items:center;gap:13px;flex:1;min-width:0;cursor:pointer">
+          <div class="li-icon ico-orange"><svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/></svg></div>
+          <div class="li-body"><div class="li-title">${esc(p.name)}</div><div class="li-sub">${fmtBytes(p.size)}</div></div>
+        </button>
+        <button type="button" class="icon-btn" data-act="delete-my-pdf" data-id="${p.id}" aria-label="Удалить" style="width:32px;height:32px;background:none;flex-shrink:0">
+          <svg viewBox="0 0 24 24"><path d="M3 6h18M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2m2 0v14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2V6h12z"/></svg>
+        </button>
+      </div>
+    `).join('')}</div>`;
+  }
+
+  $('#pdf-library-list').innerHTML = html;
+}
 
 function renderPdfReader() {
+  if (PDF_OBJ_URL) { URL.revokeObjectURL(PDF_OBJ_URL); PDF_OBJ_URL = null; }
+  if (PDF_SOURCE === 'user') {
+    const meta = (STATE.myPdfs || []).find(p => p.id === PDF_BOOK_ID);
+    $('#pdf-title').textContent = meta ? meta.name : 'PDF';
+    $('#pdf-frame').src = '';
+    pdfDbGet(PDF_BOOK_ID).then(rec => {
+      if (!rec) { toast('Файл не найден'); back(); return; }
+      PDF_OBJ_URL = URL.createObjectURL(rec.blob);
+      $('#pdf-frame').src = PDF_OBJ_URL;
+    });
+    return;
+  }
   const b = findBook(PDF_BOOK_ID);
   if (!b) return;
   $('#pdf-title').textContent = b.title;
   $('#pdf-frame').src = b.pdfFile;
 }
 
+function openMyPdf(id) {
+  PDF_SOURCE = 'user';
+  PDF_BOOK_ID = id;
+  navigate('s-pdf');
+}
+
 function openBook(id) {
   const b = findBook(id);
   if (!b || b.locked) { toast('Скоро будет доступна'); return; }
   if (b.isDua) { navigate('s-dua'); return; }
-  if (b.isPdf) { PDF_BOOK_ID = id; navigate('s-pdf'); return; }
+  if (b.isPdf) { PDF_SOURCE = 'book'; PDF_BOOK_ID = id; navigate('s-pdf'); return; }
   if (!STATE.recentBooks) STATE.recentBooks = [];
   STATE.recentBooks = [id, ...STATE.recentBooks.filter(r => r !== id)].slice(0, 4);
   saveState();
@@ -5730,6 +5859,10 @@ document.addEventListener('click', e => {
 case 'go-search': navigate('s-search'); break;
 case 'open-mix': navigate('s-mix'); break;
 case 'open-decks': navigate('s-decks'); break;
+case 'open-pdf-library': navigate('s-pdf-library'); break;
+case 'open-my-pdf': openMyPdf(t.dataset.id); break;
+case 'delete-my-pdf': deleteMyPdf(t.dataset.id); break;
+case 'pdf-upload-trigger': $('#pdf-upload-input').click(); break;
 case 'start-review':
 case 'start-due': startDue(); break;
     case 'open-practice': openPractice(LESSON_ID); break;
@@ -5919,6 +6052,7 @@ $('#sheet-bg').addEventListener('click', closeSheet);
 
 /* Search input */
 $('#search-input').addEventListener('input', e => { SEARCH_Q = e.target.value; renderSearch(); });
+$('#pdf-upload-input').addEventListener('change', e => { handlePdfUpload(e.target.files); e.target.value = ''; });
 
 /* ===== INIT ===================================================== */
 /* LESSON */
