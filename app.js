@@ -5359,41 +5359,27 @@ async function renderPdfReader() {
 
   container.innerHTML = '';
   const dpr = Math.min(window.devicePixelRatio || 1, 2);
+  const containerWidth = container.clientWidth;
 
+  // Рендерим сразу все страницы по порядку — без предварительного прохода
+  // для замера высоты и без ожидания прокрутки. Память расходуется больше,
+  // зато первая страница (и все следующие) появляются мгновенно, как раньше.
   for (let i = 1; i <= PDF_DOC.numPages; i++) {
     const page = await PDF_DOC.getPage(i);
     const baseVp = page.getViewport({ scale: 1 });
-    const cssScale = container.clientWidth / baseVp.width;
-    const wrap = document.createElement('div');
-    wrap.className = 'pdf-page';
-    wrap.style.height = (baseVp.height * cssScale) + 'px';
-    wrap.dataset.pageNum = i;
-    container.appendChild(wrap);
-  }
-
-  const renderPage = async (wrap) => {
-    if (wrap.dataset.rendered) return;
-    wrap.dataset.rendered = '1';
-    const num = parseInt(wrap.dataset.pageNum, 10);
-    const page = await PDF_DOC.getPage(num);
-    const baseVp = page.getViewport({ scale: 1 });
-    const cssScale = wrap.clientWidth / baseVp.width;
-    const viewport = page.getViewport({ scale: cssScale * dpr });
+    const viewport = page.getViewport({ scale: (containerWidth / baseVp.width) * dpr });
     const canvas = document.createElement('canvas');
     canvas.width = Math.ceil(viewport.width);
     canvas.height = Math.ceil(viewport.height);
     canvas.style.width = '100%';
-    canvas.style.height = '100%';
+    canvas.style.display = 'block';
+    const wrap = document.createElement('div');
+    wrap.className = 'pdf-page';
     wrap.appendChild(canvas);
+    container.appendChild(wrap);
     try { await page.render({ canvasContext: canvas.getContext('2d'), viewport }).promise; }
     catch (e) { console.error(e); }
-  };
-
-  PDF_OBSERVER = new IntersectionObserver((entries) => {
-    entries.forEach(entry => { if (entry.isIntersecting) renderPage(entry.target); });
-  }, { root: container, rootMargin: '600px 0px', threshold: 0.01 });
-
-  container.querySelectorAll('.pdf-page').forEach(p => PDF_OBSERVER.observe(p));
+  }
 }
 
 function openMyPdf(id) {
