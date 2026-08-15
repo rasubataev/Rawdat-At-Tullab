@@ -4161,24 +4161,6 @@ locked: false,
     isDua: true,
     parts: []
   },
-  {
-    id: 'safinat-najah',
-    ar: 'سفينة النجاة',
-    title: 'Сафинат ан-Наджа',
-    available: true,
-    isPdf: true,
-    pdfFile: 'books/safinat-an-najah.pdf',
-    parts: []
-  },
-  {
-    id: 'mukhtasar-basmalah',
-    ar: 'مختصر كتاب البسملة',
-    title: 'Мухтасар китаб аль-Басмаля',
-    available: true,
-    isPdf: true,
-    pdfFile: 'books/mukhtasar-basmalah.pdf',
-    parts: []
-  },
 
 {
   id: 'fikh',
