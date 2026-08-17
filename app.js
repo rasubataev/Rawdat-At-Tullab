@@ -4606,6 +4606,20 @@ locked: false,
  
 ];
 
+/* ===== ОБЩАЯ БИБЛИОТЕКА PDF ======================================
+   Книги здесь видит КАЖДЫЙ посетитель сайта — без пароля и без сервера,
+   потому что это просто статические файлы в репозитории на GitHub.
+
+   Чтобы добавить книгу:
+   1) залей сам PDF-файл в папку shared-books/ (GitHub → Add file → Upload files);
+   2) допиши сюда одну строку по образцу ниже — id придумай любой уникальный
+      (латиницей, без пробелов), file — точный путь до загруженного файла;
+   3) сохрани/закоммить app.js как обычно.
+   Чтобы убрать книгу — удали её строку отсюда (сам файл в shared-books/
+   можно оставить, он просто перестанет быть доступен из приложения). */
+const SHARED_LIBRARY_BOOKS = [
+  // { id: 'safina-najah', title: 'Сафинат ан-Наджа', file: 'shared-books/safina-najah.pdf' },
+];
 
 
 
@@ -5016,7 +5030,7 @@ function navigate(screenId, { stack = true } = {}) {
     's-decks': 'learn', 's-deck': 'learn',
     's-hard': 'learn', 's-mix': 'learn', 's-search': 'learn', 's-pdf': 'learn', 's-pdf-library': 'learn',
     's-translate': 'learn', 's-irab': 'learn', 's-sarf': 'learn',
-    's-stats': 'stats', 's-settings': 'settings', 's-admin': 'settings',
+    's-stats': 'stats', 's-settings': 'settings',
   };
   const tab = tabMap[screenId] || '';
   $$('.nav-btn').forEach(b => b.classList.toggle('active', b.dataset.tab === tab));
@@ -5056,7 +5070,6 @@ function runScreenRender(id) {
     case 's-lesson': renderLesson(); break;
     case 's-pdf': renderPdfReader(); break;
     case 's-pdf-library': renderPdfLibrary(); break;
-    case 's-admin': renderAdmin(); break;
   }
  
 }
@@ -5164,8 +5177,8 @@ function renderLearn() {
     </button>
     <button type="button" class="list-item" data-act="open-pdf-library">
       <div class="li-icon ico-orange"><svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/></svg></div>
-      <div class="li-body"><div class="li-title">Мои PDF</div><div class="li-sub">Загружай книги прямо с телефона</div></div>
-      <div class="li-trail"><span style="font-weight:600;color:var(--text-3)">${(STATE.myPdfs || []).length + BOOKS.filter(b => b.isPdf).length}</span><svg viewBox="0 0 24 24"><path d="M9 6l6 6-6 6"/></svg></div>
+      <div class="li-body"><div class="li-title">Библиотека PDF</div><div class="li-sub">Книги для чтения</div></div>
+      <div class="li-trail"><span style="font-weight:600;color:var(--text-3)">${SHARED_LIBRARY_BOOKS.length}</span><svg viewBox="0 0 24 24"><path d="M9 6l6 6-6 6"/></svg></div>
     </button>
   </div>
 
@@ -5212,7 +5225,13 @@ function renderBooks() {
         ` : locked ? `<div class="tiny" style="margin-top:4px;color:var(--text-3)">Скоро</div>` : ''}
       </button>
     `;
-  }).join('') + `</div>`;
+  }).join('') + `
+    <button type="button" class="tile" data-act="open-pdf-library">
+      <div class="tile-icon ico-orange"><svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/></svg></div>
+      <div style="font-size:18px;font-weight:700;line-height:1.2">Библиотека PDF</div>
+      <div class="tile-sub">Книги для чтения</div>
+    </button>
+  ` + `</div>`;
 }
 
 
@@ -5220,7 +5239,8 @@ let BOOK_ID = null, PART_ID = null, UNIT_ID = null;
 let PDF_BOOK_ID = null, PDF_SOURCE = 'book', PDF_OBJ_URL = null, PDF_DOC = null, PDF_OBSERVER = null;
 let PDF_RENDER_TOKEN = 0;
 
-/* ===== USER PDF LIBRARY (IndexedDB, unlimited by us — only device storage limits) === */
+// openPdfDB/pdfDbGet оставлены только ради нерабочего старого экрана s-pdf
+// (renderPdfReader ниже) — сам он не используется, но ссылается на них.
 const PDF_DB_NAME = 'dhp-pdfs', PDF_DB_STORE = 'files';
 function openPdfDB() {
   return new Promise((resolve, reject) => {
@@ -5230,14 +5250,6 @@ function openPdfDB() {
     req.onerror = () => reject(req.error);
   });
 }
-function pdfDbPut(record) {
-  return openPdfDB().then(db => new Promise((resolve, reject) => {
-    const tx = db.transaction(PDF_DB_STORE, 'readwrite');
-    tx.objectStore(PDF_DB_STORE).put(record);
-    tx.oncomplete = () => resolve();
-    tx.onerror = () => reject(tx.error);
-  }));
-}
 function pdfDbGet(id) {
   return openPdfDB().then(db => new Promise((resolve, reject) => {
     const req = db.transaction(PDF_DB_STORE, 'readonly').objectStore(PDF_DB_STORE).get(id);
@@ -5245,113 +5257,35 @@ function pdfDbGet(id) {
     req.onerror = () => reject(req.error);
   }));
 }
-function pdfDbDelete(id) {
-  return openPdfDB().then(db => new Promise((resolve, reject) => {
-    const tx = db.transaction(PDF_DB_STORE, 'readwrite');
-    tx.objectStore(PDF_DB_STORE).delete(id);
-    tx.oncomplete = () => resolve();
-    tx.onerror = () => reject(tx.error);
-  }));
-}
-
-function handlePdfUpload(fileList) {
-  const file = fileList && fileList[0];
-  if (!file) return;
-  const isPdf = file.type === 'application/pdf' || /\.pdf$/i.test(file.name);
-  if (!isPdf) { toast('Выбери файл в формате PDF'); return; }
-  const id = 'updf_' + Math.random().toString(36).slice(2, 10);
-  file.arrayBuffer().then(buf => pdfDbPut({ id, blob: new Blob([buf], { type: 'application/pdf' }) }))
-    .then(() => {
-      if (!STATE.myPdfs) STATE.myPdfs = [];
-      STATE.myPdfs.unshift({ id, name: file.name.replace(/\.pdf$/i, ''), size: file.size, addedAt: now() });
-      saveState();
-      renderPdfLibrary();
-      toast('Книга добавлена');
-    })
-    .catch(e => { console.error(e); toast('Не удалось сохранить файл — не хватает места на устройстве'); });
-}
-
-function deleteMyPdf(id) {
-  if (!confirm('Удалить эту книгу?')) return;
-  pdfDbDelete(id).finally(() => {
-    STATE.myPdfs = (STATE.myPdfs || []).filter(p => p.id !== id);
-    saveState();
-    renderPdfLibrary();
-    toast('Удалено');
-  });
-}
-
-function fmtBytes(n) {
-  if (n < 1024) return n + ' Б';
-  if (n < 1024 * 1024) return Math.round(n / 1024) + ' КБ';
-  return (n / (1024 * 1024)).toFixed(1) + ' МБ';
-}
+// Книги в SHARED_LIBRARY_BOOKS открываются напрямую по статическому пути —
+// ничего заранее не скачивается и не кэшируется, файл запрашивается у сервера
+// только в момент нажатия на конкретную книгу (см. case 'open-shared-book').
+let PDF_LIBRARY_QUERY = '';
 
 function renderPdfLibrary() {
-  const builtIn = BOOKS.filter(b => b.isPdf);
-  const mine = STATE.myPdfs || [];
-  let html = '';
-
-  // Общая библиотека — книги, которые добавил администратор через /admin.
-  // Видна всем посетителям сайта (грузится с Cloudflare Worker), в отличие
-  // от «Моих PDF» ниже, которые лежат только в IndexedDB этого устройства.
-  html += `<div class="section-head"><span class="eyebrow">Общая библиотека</span></div>
-  <div id="shared-library-list"><div class="empty-state"><div class="es-title">Загрузка…</div></div></div>`;
-
-  if (builtIn.length) {
-    html += `<div class="section-head"><span class="eyebrow">Книги для чтения</span></div>
-    <div class="list-group" style="margin:0 16px">${builtIn.map(b => `
-      <button type="button" class="list-item" data-act="open-book" data-book="${b.id}">
-        <div class="li-icon ico-brand"><svg viewBox="0 0 24 24"><path d="M4 5a2 2 0 0 1 2-2h12v18H6a2 2 0 0 1-2-2zM8 3v18"/></svg></div>
-        <div class="li-body"><div class="li-title">${esc(b.title)}</div><div class="li-sub" style="direction:rtl;font-family:var(--font-ar)">${esc(b.ar)}</div></div>
-        <div class="li-trail"><svg viewBox="0 0 24 24"><path d="M9 6l6 6-6 6"/></svg></div>
-      </button>
-    `).join('')}</div>`;
+  if (!SHARED_LIBRARY_BOOKS.length) {
+    $('#pdf-library-list').innerHTML = `<div class="empty-state"><div class="es-icon"><svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/></svg></div><div class="es-title">Пока пусто</div><div class="es-text">Скоро здесь появятся книги</div></div>`;
+    return;
   }
 
-  html += `<div class="section-head" style="margin-top:8px"><span class="eyebrow">Мои PDF</span></div>`;
+  const q = PDF_LIBRARY_QUERY.trim().toLowerCase();
+  const books = SHARED_LIBRARY_BOOKS
+    .filter(b => !q || b.title.toLowerCase().includes(q))
+    .slice()
+    .sort((a, b) => a.title.localeCompare(b.title, 'ru'));
 
-  if (!mine.length) {
-    html += `<div class="empty-state"><div class="es-icon"><svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6M12 18v-6M9 15h6"/></svg></div><div class="es-title">Пока пусто</div><div class="es-text">Добавь свою первую PDF-книгу кнопкой + вверху</div></div>`;
-  } else {
-    html += `<div class="list-group" style="margin:0 16px">${mine.map(p => `
-      <div class="list-item" style="padding-right:10px">
-        <button type="button" data-act="open-my-pdf" data-id="${p.id}" style="all:unset;display:flex;align-items:center;gap:13px;flex:1;min-width:0;cursor:pointer">
-          <div class="li-icon ico-orange"><svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/></svg></div>
-          <div class="li-body"><div class="li-title">${esc(p.name)}</div><div class="li-sub">${fmtBytes(p.size)}</div></div>
-        </button>
-        <button type="button" class="icon-btn" data-act="delete-my-pdf" data-id="${p.id}" aria-label="Удалить" style="width:32px;height:32px;background:none;flex-shrink:0">
-          <svg viewBox="0 0 24 24"><path d="M3 6h18M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2m2 0v14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2V6h12z"/></svg>
-        </button>
-      </div>
-    `).join('')}</div>`;
+  if (!books.length) {
+    $('#pdf-library-list').innerHTML = `<div class="empty-state"><div class="es-icon"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3-3"/></svg></div><div class="es-title">Не найдено</div></div>`;
+    return;
   }
 
-  $('#pdf-library-list').innerHTML = html;
-  loadSharedLibrary();
-}
-
-async function loadSharedLibrary() {
-  const el = $('#shared-library-list');
-  if (!el) return;
-  try {
-    const res = await fetch(BOOKS_API_URL + '/books');
-    if (!res.ok) throw new Error('bad response');
-    const books = await res.json();
-    if (!Array.isArray(books) || !books.length) {
-      el.innerHTML = `<div class="empty-state" style="padding:20px 0"><div class="es-text">Пока нет общих книг</div></div>`;
-      return;
-    }
-    el.innerHTML = `<div class="list-group" style="margin:0 16px">${books.map(b => `
-      <button type="button" class="list-item" data-act="open-shared-book" data-id="${b.id}">
-        <div class="li-icon ico-brand"><svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/></svg></div>
-        <div class="li-body"><div class="li-title">${esc(b.title)}</div><div class="li-sub">${fmtBytes(b.size)}</div></div>
-        <div class="li-trail"><svg viewBox="0 0 24 24"><path d="M9 6l6 6-6 6"/></svg></div>
-      </button>
-    `).join('')}</div>`;
-  } catch (e) {
-    el.innerHTML = `<div class="empty-state" style="padding:20px 0"><div class="es-text">Не удалось загрузить (нет интернета?)</div></div>`;
-  }
+  $('#pdf-library-list').innerHTML = `<div class="list-group" style="margin:0 16px">${books.map(b => `
+    <button type="button" class="list-item" data-act="open-shared-book" data-file="${esc(b.file)}">
+      <div class="li-icon ico-brand"><svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/></svg></div>
+      <div class="li-body"><div class="li-title">${esc(b.title)}</div></div>
+      <div class="li-trail"><svg viewBox="0 0 24 24"><path d="M9 6l6 6-6 6"/></svg></div>
+    </button>
+  `).join('')}</div>`;
 }
 
 async function renderPdfReader() {
@@ -5442,19 +5376,6 @@ async function renderPdfReader() {
     }
   }
   if (myToken === PDF_RENDER_TOKEN) $('#pdf-title').textContent = bookTitle;
-}
-
-async function openMyPdf(id) {
-  // Не рендерим PDF сами — отдаём файл нативному просмотрщику браузера/ОС
-  // через blob-ссылку. Рендерингом занимается движок телефона, а не наш
-  // JS-цикл по canvas, поэтому багов с памятью и застреванием на первой
-  // странице здесь в принципе быть не может.
-  const rec = await pdfDbGet(id);
-  if (!rec) { toast('Файл не найден'); return; }
-  const url = URL.createObjectURL(rec.blob);
-  const win = window.open(url, '_blank');
-  if (!win) location.href = url;
-  setTimeout(() => URL.revokeObjectURL(url), 60000);
 }
 
 function openBook(id) {
@@ -5962,23 +5883,7 @@ case 'go-search': navigate('s-search'); break;
 case 'open-mix': navigate('s-mix'); break;
 case 'open-decks': navigate('s-decks'); break;
 case 'open-pdf-library': navigate('s-pdf-library'); break;
-case 'open-my-pdf': openMyPdf(t.dataset.id); break;
-case 'delete-my-pdf': deleteMyPdf(t.dataset.id); break;
-case 'pdf-upload-trigger': $('#pdf-upload-input').click(); break;
-case 'open-shared-book': window.open(BOOKS_API_URL + '/books/file/' + t.dataset.id, '_blank'); break;
-case 'version-tap': handleVersionTap(); break;
-case 'admin-login': {
-  const pass = $('#admin-pass-input')?.value || '';
-  if (!pass) { toast('Введи пароль'); break; }
-  verifyAdminPassword(pass).then(ok => {
-    if (ok) { setAdminPass(pass); closeSheet(); navigate('s-admin'); }
-    else toast('Неверный пароль');
-  });
-  break;
-}
-case 'admin-logout': clearAdminPass(); toast('Вы вышли'); navigate('s-settings', { stack: false }); break;
-case 'admin-upload': adminUploadBook(); break;
-case 'admin-delete-book': adminDeleteBook(t.dataset.id); break;
+case 'open-shared-book': window.open(t.dataset.file, '_blank'); break;
 case 'start-review':
 case 'start-due': startDue(); break;
     case 'open-practice': openPractice(LESSON_ID); break;
@@ -6189,7 +6094,7 @@ $('#sheet-bg').addEventListener('click', closeSheet);
 
 /* Search input */
 $('#search-input').addEventListener('input', e => { SEARCH_Q = e.target.value; renderSearch(); });
-$('#pdf-upload-input').addEventListener('change', e => { handlePdfUpload(e.target.files); e.target.value = ''; });
+$('#pdf-library-search').addEventListener('input', e => { PDF_LIBRARY_QUERY = e.target.value; renderPdfLibrary(); });
 
 /* ===== INIT ===================================================== */
 /* LESSON */
@@ -10036,123 +9941,6 @@ if ('serviceWorker' in navigator) {
   });
 }
 const TRANSLATE_PROXY_URL = 'https://rawdat-tullab.z7gf59b4cn.workers.dev';
-
-/* ===== АДМИН: общая библиотека книг (видна всем посетителям сайта) ===== */
-// Тот же Worker, что и для переводчика, обслуживает и книги — незачем
-// разворачивать второй Worker ради пары дополнительных путей.
-const BOOKS_API_URL = TRANSLATE_PROXY_URL;
-
-// Пароль администратора хранится ОТДЕЛЬНО от общего STATE (не в 'dhp.v3'),
-// чтобы он не попадал в экспорт/импорт данных (JSON-бэкап) и не улетал
-// вместе с прогрессом, если человек поделится файлом бэкапа.
-const ADMIN_PASS_KEY = 'dhp.admin.pass';
-function getAdminPass() { try { return localStorage.getItem(ADMIN_PASS_KEY) || ''; } catch (e) { return ''; } }
-function setAdminPass(p) { try { localStorage.setItem(ADMIN_PASS_KEY, p); } catch (e) {} }
-function clearAdminPass() { try { localStorage.removeItem(ADMIN_PASS_KEY); } catch (e) {} }
-
-// Вход в админку скрыт: обычный посетитель никогда не увидит кнопку —
-// нужно 7 раз подряд тапнуть по строке версии приложения в «Настройках».
-let VERSION_TAP_COUNT = 0, VERSION_TAP_TIMER = 0;
-function handleVersionTap() {
-  VERSION_TAP_COUNT++;
-  clearTimeout(VERSION_TAP_TIMER);
-  VERSION_TAP_TIMER = setTimeout(() => { VERSION_TAP_COUNT = 0; }, 1500);
-  if (VERSION_TAP_COUNT >= 7) {
-    VERSION_TAP_COUNT = 0;
-    openAdminPasswordSheet();
-  }
-}
-
-function openAdminPasswordSheet() {
-  openSheet('Вход для администратора', `
-    <div class="field"><label>Пароль</label><input class="input" id="admin-pass-input" type="password" autocomplete="off"></div>
-    <div class="btn-row" style="margin-top:8px">
-      <button type="button" class="btn btn-secondary" data-act="close-sheet">Отмена</button>
-      <button type="button" class="btn btn-primary" data-act="admin-login">Войти</button>
-    </div>
-  `, body => body.querySelector('#admin-pass-input').focus());
-}
-
-// Пароль проверяет сам Worker (сравнивает с секретом ADMIN_PASSWORD) — это
-// и есть настоящая защита. Хранение пароля на этом устройстве — просто
-// удобство, чтобы не вводить его каждый раз; реальную загрузку/удаление
-// книг Worker всё равно не примет без верного пароля в заголовке.
-async function verifyAdminPassword(pass) {
-  try {
-    const res = await fetch(BOOKS_API_URL + '/admin/verify', {
-      method: 'POST',
-      headers: { 'X-Admin-Password': pass },
-    });
-    return res.ok;
-  } catch (e) { return false; }
-}
-
-async function renderAdmin() {
-  if (!getAdminPass()) { toast('Нужно войти'); back(); return; }
-  const list = $('#admin-list');
-  list.innerHTML = `<div class="empty-state"><div class="es-title">Загрузка…</div></div>`;
-  try {
-    const res = await fetch(BOOKS_API_URL + '/books');
-    const books = await res.json();
-    if (!Array.isArray(books) || !books.length) {
-      list.innerHTML = `<div class="empty-state"><div class="es-title">Пока пусто</div><div class="es-text">Добавь первую книгу выше</div></div>`;
-      return;
-    }
-    list.innerHTML = `<div class="list-group" style="margin:0 16px">${books.map(b => `
-      <div class="list-item" style="padding-right:10px">
-        <div class="li-icon ico-brand"><svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/></svg></div>
-        <div class="li-body"><div class="li-title">${esc(b.title)}</div><div class="li-sub">${fmtBytes(b.size)}</div></div>
-        <button type="button" class="icon-btn" data-act="admin-delete-book" data-id="${b.id}" aria-label="Удалить" style="width:32px;height:32px;background:none;flex-shrink:0">
-          <svg viewBox="0 0 24 24"><path d="M3 6h18M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2m2 0v14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2V6h12z"/></svg>
-        </button>
-      </div>
-    `).join('')}</div>`;
-  } catch (e) {
-    list.innerHTML = `<div class="empty-state"><div class="es-title">Ошибка загрузки</div></div>`;
-  }
-}
-
-async function adminUploadBook() {
-  const pass = getAdminPass();
-  const titleEl = $('#admin-upload-title'), fileEl = $('#admin-upload-file');
-  const title = titleEl?.value?.trim();
-  const file = fileEl?.files?.[0];
-  if (!title) { toast('Введи название'); return; }
-  if (!file) { toast('Выбери файл'); return; }
-  const fd = new FormData();
-  fd.append('title', title);
-  fd.append('file', file);
-  toast('Загрузка…', 5000);
-  try {
-    const res = await fetch(BOOKS_API_URL + '/admin/upload', {
-      method: 'POST',
-      headers: { 'X-Admin-Password': pass },
-      body: fd,
-    });
-    if (!res.ok) { toast('Ошибка загрузки'); return; }
-    titleEl.value = '';
-    fileEl.value = '';
-    toast('Книга добавлена для всех');
-    renderAdmin();
-  } catch (e) {
-    toast('Ошибка соединения');
-  }
-}
-
-async function adminDeleteBook(id) {
-  if (!confirm('Удалить книгу для всех пользователей?')) return;
-  const pass = getAdminPass();
-  try {
-    const res = await fetch(BOOKS_API_URL + '/admin/delete', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'X-Admin-Password': pass },
-      body: JSON.stringify({ id }),
-    });
-    if (!res.ok) { toast('Ошибка удаления'); return; }
-    toast('Удалено');
-    renderAdmin();
-  } catch (e) { toast('Ошибка соединения'); }
-}
 
 async function callClaudeProxy(text, mode) {
   if (!text) return null;
