@@ -4606,23 +4606,26 @@ locked: false,
  
 ];
 
-/* ===== ОБЩАЯ БИБЛИОТЕКА PDF ======================================
-   Книги здесь видит КАЖДЫЙ посетитель сайта — без пароля и без сервера,
-   потому что это просто статические файлы в репозитории на GitHub.
+/* ===== ПОЛЕЗНЫЕ ССЫЛКИ И КАНАЛЫ ==================================
+   Список ссылок видит КАЖДЫЙ посетитель сайта — без пароля и без сервера,
+   потому что это просто статический список в app.js.
 
-   Чтобы добавить книгу:
-   1) залей сам PDF-файл в корень репозитория (GitHub → Add file → Upload
-      files) — рядом с app.js, ничего переименовывать/дописывать не нужно;
-   2) допиши сюда одну строку по образцу ниже — id придумай любой уникальный
-      (латиницей, без пробелов), file — точное имя загруженного файла;
-   3) сохрани/закоммить app.js как обычно.
-   Чтобы убрать книгу — удали её строку отсюда (сам файл можно оставить,
-   он просто перестанет быть доступен из приложения). */
-const SHARED_LIBRARY_BOOKS = [
-  { id: 'nav40-full', title: '40 хадисов ан-Навави', file: 'الأربعون النووية.pdf' },
-  { id: 'durus-nahw', title: 'Дурус ан-нахв', file: 'دروس النحو.pdf' },
-  { id: 'kitab-basmala', title: 'Мухтасар Китаб аль-Басмаля', file: 'مختصر كتاب البسملة.pdf' },
-  { id: 'safina-najah', title: 'Сафинат ан-Наджа', file: 'سفينة النجاة.pdf' },
+   Чтобы добавить ссылку:
+   1) допиши сюда одну строку по образцу ниже — id придумай любой уникальный
+      (латиницей, без пробелов), title — название, url — сама ссылка;
+   2) сохрани/закоммить app.js как обычно.
+   Чтобы убрать ссылку — удали её строку отсюда. */
+const USEFUL_LINKS = [
+  { id: 'faharis', title: 'فهارس الكتب', desc: 'Библиотека книг PDF в Telegram', url: 'https://t.me/faharisalkutub' },
+  { id: 'shkutub', title: 'كتب الشافعية', desc: 'Большая библиотека книг по мазхабу имама Шафии', url: 'https://t.me/Shkutub' },
+  { id: 'dars-asvad', title: 'درس الأسود', desc: 'Канзур Рагъибин — записи от устаза Асвада на чеченском', url: 'https://t.me/dars_asvad' },
+  { id: 'rawdat-app', title: 'Rawdat At-Tullab', desc: 'Наш канал: книги из программы и переводы на чеченский', url: 'https://t.me/rawdatapp' },
+];
+
+const USEFUL_APPS = [
+  { id: 'arabus', title: 'Арабус', desc: 'Арабско-русский словарь — перевод слов', url: 'https://apps.apple.com/kz/app/%D0%B0%D1%80%D0%B0%D0%B1%D1%83%D1%81-%D0%B0%D1%80%D0%B0%D0%B1%D1%81%D0%BA%D0%BE-%D1%80%D1%83%D1%81%D1%81%D0%BA%D0%B8%D0%B9-%D1%81%D0%BB%D0%BE%D0%B2%D0%B0%D1%80%D1%8C/id741293784' },
+  { id: 'al-bahith', title: 'الباحث القرآني', desc: 'Поиск по Корану — тафсиры и кыраты', url: 'https://apps.apple.com/in/app/%D8%A7%D9%84%D8%A8%D8%A7%D8%AD%D8%AB-%D8%A7%D9%84%D9%82%D8%B1%D8%A2%D9%86%D9%8A/id1450111969' },
+  { id: 'maani', title: 'معجم المعاني', desc: 'Значения слов и все их формы', url: 'https://apps.apple.com/kz/app/%D9%85%D8%B9%D8%AC%D9%85-%D8%A7%D9%84%D9%85%D8%B9%D8%A7%D9%86%D9%8A-%D8%B9%D8%B1%D8%A8%D9%8A-%D8%B9%D8%B1%D8%A8%D9%8A/id952606463' },
 ];
 
 
@@ -5032,7 +5035,7 @@ function navigate(screenId, { stack = true } = {}) {
     's-home': 'home', 's-learn': 'learn',
     's-books': 'learn', 's-parts': 'learn', 's-units': 'learn', 's-unit': 'learn',
     's-decks': 'learn', 's-deck': 'learn',
-    's-hard': 'learn', 's-mix': 'learn', 's-search': 'learn', 's-pdf': 'learn', 's-pdf-library': 'learn',
+    's-hard': 'learn', 's-mix': 'learn', 's-search': 'learn', 's-pdf': 'learn', 's-links': 'learn',
     's-translate': 'learn', 's-irab': 'learn', 's-sarf': 'learn',
     's-stats': 'stats', 's-settings': 'settings',
   };
@@ -5073,7 +5076,7 @@ function runScreenRender(id) {
     case 's-settings': renderSettings(); break;
     case 's-lesson': renderLesson(); break;
     case 's-pdf': renderPdfReader(); break;
-    case 's-pdf-library': renderPdfLibrary(); break;
+    case 's-links': renderLinks(); break;
   }
  
 }
@@ -5179,10 +5182,10 @@ function renderLearn() {
       <div class="li-body"><div class="li-title">Мои колоды</div><div class="li-sub">Личные наборы слов</div></div>
       <div class="li-trail"><span style="font-weight:600;color:var(--text-3)">${Object.keys(STATE.decks).length}</span><svg viewBox="0 0 24 24"><path d="M9 6l6 6-6 6"/></svg></div>
     </button>
-    <button type="button" class="list-item" data-act="open-pdf-library">
-      <div class="li-icon ico-orange"><svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/></svg></div>
-      <div class="li-body"><div class="li-title">Библиотека PDF</div><div class="li-sub">Книги для чтения</div></div>
-      <div class="li-trail"><span style="font-weight:600;color:var(--text-3)">${SHARED_LIBRARY_BOOKS.length}</span><svg viewBox="0 0 24 24"><path d="M9 6l6 6-6 6"/></svg></div>
+    <button type="button" class="list-item" data-act="open-links">
+      <div class="li-icon ico-orange"><svg viewBox="0 0 24 24"><path d="M10 13a5 5 0 0 0 7.07 0l2.83-2.83a5 5 0 0 0-7.07-7.07L11 4.93"/><path d="M14 11a5 5 0 0 0-7.07 0L4.1 13.83a5 5 0 0 0 7.07 7.07L13 19.07"/></svg></div>
+      <div class="li-body"><div class="li-title">Полезные ссылки</div><div class="li-sub">Каналы и материалы</div></div>
+      <div class="li-trail"><span style="font-weight:600;color:var(--text-3)">${USEFUL_LINKS.length + USEFUL_APPS.length}</span><svg viewBox="0 0 24 24"><path d="M9 6l6 6-6 6"/></svg></div>
     </button>
   </div>
 
@@ -5230,10 +5233,10 @@ function renderBooks() {
       </button>
     `;
   }).join('') + `
-    <button type="button" class="tile" data-act="open-pdf-library">
-      <div class="tile-icon ico-orange"><svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/></svg></div>
-      <div style="font-size:18px;font-weight:700;line-height:1.2">Библиотека PDF</div>
-      <div class="tile-sub">Книги для чтения</div>
+    <button type="button" class="tile" data-act="open-links">
+      <div class="tile-icon ico-orange"><svg viewBox="0 0 24 24"><path d="M10 13a5 5 0 0 0 7.07 0l2.83-2.83a5 5 0 0 0-7.07-7.07L11 4.93"/><path d="M14 11a5 5 0 0 0-7.07 0L4.1 13.83a5 5 0 0 0 7.07 7.07L13 19.07"/></svg></div>
+      <div style="font-size:18px;font-weight:700;line-height:1.2">Полезные ссылки</div>
+      <div class="tile-sub">Каналы и материалы</div>
     </button>
   ` + `</div>`;
 }
@@ -5261,35 +5264,38 @@ function pdfDbGet(id) {
     req.onerror = () => reject(req.error);
   }));
 }
-// Книги в SHARED_LIBRARY_BOOKS открываются напрямую по статическому пути —
-// ничего заранее не скачивается и не кэшируется, файл запрашивается у сервера
-// только в момент нажатия на конкретную книгу (см. case 'open-shared-book').
-let PDF_LIBRARY_QUERY = '';
-
-function renderPdfLibrary() {
-  if (!SHARED_LIBRARY_BOOKS.length) {
-    $('#pdf-library-list').innerHTML = `<div class="empty-state"><div class="es-icon"><svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/></svg></div><div class="es-title">Пока пусто</div><div class="es-text">Скоро здесь появятся книги</div></div>`;
-    return;
-  }
-
-  const q = PDF_LIBRARY_QUERY.trim().toLowerCase();
-  const books = SHARED_LIBRARY_BOOKS
-    .filter(b => !q || b.title.toLowerCase().includes(q))
-    .slice()
-    .sort((a, b) => a.title.localeCompare(b.title, 'ru'));
-
-  if (!books.length) {
-    $('#pdf-library-list').innerHTML = `<div class="empty-state"><div class="es-icon"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3-3"/></svg></div><div class="es-title">Не найдено</div></div>`;
-    return;
-  }
-
-  $('#pdf-library-list').innerHTML = `<div class="list-group" style="margin:0 16px">${books.map(b => `
-    <button type="button" class="list-item" data-act="open-shared-book" data-file="${esc(b.file)}">
-      <div class="li-icon ico-brand"><svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/></svg></div>
-      <div class="li-body"><div class="li-title">${esc(b.title)}</div></div>
+// Ссылки в USEFUL_LINKS/USEFUL_APPS открываются напрямую по указанному url
+// в новой вкладке — ничего заранее не скачивается и не кэшируется.
+function linkItemHTML(l, kind) {
+  const icon = kind === 'app'
+    ? `<svg viewBox="0 0 24 24"><rect x="7" y="2" width="10" height="20" rx="2"/><path d="M11 18h2"/></svg>`
+    : `<svg viewBox="0 0 24 24"><path d="M10 13a5 5 0 0 0 7.07 0l2.83-2.83a5 5 0 0 0-7.07-7.07L11 4.93"/><path d="M14 11a5 5 0 0 0-7.07 0L4.1 13.83a5 5 0 0 0 7.07 7.07L13 19.07"/></svg>`;
+  const iconClass = kind === 'app' ? 'ico-purple' : 'ico-brand';
+  return `
+    <button type="button" class="list-item" data-act="open-link" data-url="${esc(l.url)}">
+      <div class="li-icon ${iconClass}">${icon}</div>
+      <div class="li-body"><div class="li-title">${esc(l.title)}</div>${l.desc ? `<div class="li-sub">${esc(l.desc)}</div>` : ''}</div>
       <div class="li-trail"><svg viewBox="0 0 24 24"><path d="M9 6l6 6-6 6"/></svg></div>
     </button>
-  `).join('')}</div>`;
+  `;
+}
+
+function renderLinks() {
+  if (!USEFUL_LINKS.length && !USEFUL_APPS.length) {
+    $('#links-list').innerHTML = `<div class="empty-state"><div class="es-icon"><svg viewBox="0 0 24 24"><path d="M10 13a5 5 0 0 0 7.07 0l2.83-2.83a5 5 0 0 0-7.07-7.07L11 4.93"/><path d="M14 11a5 5 0 0 0-7.07 0L4.1 13.83a5 5 0 0 0 7.07 7.07L13 19.07"/></svg></div><div class="es-title">Пока пусто</div><div class="es-text">Скоро здесь появятся ссылки на каналы</div></div>`;
+    return;
+  }
+
+  let html = '';
+  if (USEFUL_LINKS.length) {
+    html += `<div class="section-head"><span class="eyebrow">Каналы</span></div>
+    <div class="list-group" style="margin:0 16px">${USEFUL_LINKS.map(l => linkItemHTML(l, 'channel')).join('')}</div>`;
+  }
+  if (USEFUL_APPS.length) {
+    html += `<div class="section-head" style="padding-top:16px"><span class="eyebrow">Приложения</span></div>
+    <div class="list-group" style="margin:0 16px">${USEFUL_APPS.map(l => linkItemHTML(l, 'app')).join('')}</div>`;
+  }
+  $('#links-list').innerHTML = html;
 }
 
 async function renderPdfReader() {
@@ -5886,8 +5892,8 @@ document.addEventListener('click', e => {
 case 'go-search': navigate('s-search'); break;
 case 'open-mix': navigate('s-mix'); break;
 case 'open-decks': navigate('s-decks'); break;
-case 'open-pdf-library': navigate('s-pdf-library'); break;
-case 'open-shared-book': window.open(encodeURI(t.dataset.file), '_blank'); break;
+case 'open-links': navigate('s-links'); break;
+case 'open-link': window.open(t.dataset.url, '_blank'); break;
 case 'start-review':
 case 'start-due': startDue(); break;
     case 'open-practice': openPractice(LESSON_ID); break;
@@ -6098,7 +6104,6 @@ $('#sheet-bg').addEventListener('click', closeSheet);
 
 /* Search input */
 $('#search-input').addEventListener('input', e => { SEARCH_Q = e.target.value; renderSearch(); });
-$('#pdf-library-search').addEventListener('input', e => { PDF_LIBRARY_QUERY = e.target.value; renderPdfLibrary(); });
 
 /* ===== INIT ===================================================== */
 /* LESSON */
