@@ -4616,9 +4616,9 @@ locked: false,
    2) сохрани/закоммить app.js как обычно.
    Чтобы убрать ссылку — удали её строку отсюда. */
 const USEFUL_LINKS = [
-  { id: 'faharis', title: 'فهارس الكتب', desc: 'Библиотека книг PDF в Telegram', url: 'https://t.me/faharisalkutub' },
-  { id: 'shkutub', title: 'كتب الشافعية', desc: 'Большая библиотека книг по мазхабу имама Шафии', url: 'https://t.me/Shkutub' },
-  { id: 'dars-asvad', title: 'درس الأسود', desc: 'Канзур Рагъибин — записи от устаза Асвада на чеченском', url: 'https://t.me/dars_asvad' },
+  { id: 'faharis', title: 'فهرس جامع الكتب المصورة', desc: 'Библиотека книг PDF в Telegram', url: 'https://t.me/faharisalkutub' },
+  { id: 'shkutub', title: 'خزانة الشافعية', desc: 'Большая библиотека книг по мазхабу имама Шафии', url: 'https://t.me/Shkutub' },
+  { id: 'dars-asvad', title: 'كنز الراغبين / أ.د أسود', desc: 'Канзур Рагъибин — записи от устаза Асвада на чеченском', url: 'https://t.me/dars_asvad' },
   { id: 'rawdat-app', title: 'Rawdat At-Tullab', desc: 'Наш канал: книги из программы и переводы на чеченский', url: 'https://t.me/rawdatapp' },
 ];
 
