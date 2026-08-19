@@ -5928,8 +5928,9 @@ case 'do-translate': {
   const text = $('#tr-input').value.trim();
   if (!text) { toast('Введи текст'); break; }
   const dir = document.querySelector('#s-translate .seg.on')?.textContent?.includes('AR') ? 'ru' : 'ar';
+  const direction = dir === 'ru' ? 'ar-ru' : 'ru-ar';
   $('#tr-result').textContent = '...';
-  translateWord(text, dir).then(res => {
+  translateWord(text, direction).then(res => {
     $('#tr-result').textContent = res || 'Не удалось перевести';
     $('#tr-result').style.direction = dir === 'ru' ? 'ltr' : 'rtl';
   });
@@ -9951,13 +9952,13 @@ if ('serviceWorker' in navigator) {
 }
 const TRANSLATE_PROXY_URL = 'https://rawdat-tullab.z7gf59b4cn.workers.dev';
 
-async function callClaudeProxy(text, mode) {
+async function callClaudeProxy(text, mode, direction) {
   if (!text) return null;
   try {
     const res = await fetch(TRANSLATE_PROXY_URL, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ text, mode })
+      body: JSON.stringify({ text, mode, direction })
     });
     const data = await res.json();
     if (data.error) { toast(data.error.message || 'Ошибка'); return null; }
@@ -9969,8 +9970,8 @@ async function callClaudeProxy(text, mode) {
   }
 }
 
-async function translateWord(text, toLang = 'ru') {
-  return callClaudeProxy(text, 'translate');
+async function translateWord(text, direction) {
+  return callClaudeProxy(text, 'translate', direction);
 }
 
 async function analyzeIrab(text) {
