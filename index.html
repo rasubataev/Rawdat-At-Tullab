@@ -17,6 +17,25 @@
 </head>
 <body>
 
+<div class="cookie-banner" id="cookie-banner" hidden>
+  <div class="cookie-banner-text">Мы не используем cookie для отслеживания. Учебный прогресс хранится локально в браузере (localStorage) и не передаётся на сервер. <a href="privacy.html#cookies">Подробнее</a></div>
+  <button type="button" class="cookie-banner-close" id="cookie-banner-close" aria-label="Закрыть">×</button>
+</div>
+<script>
+(function () {
+  var KEY = 'cookieNoticeDismissed';
+  try {
+    if (localStorage.getItem(KEY)) return;
+  } catch (e) { return; }
+  var banner = document.getElementById('cookie-banner');
+  banner.hidden = false;
+  document.getElementById('cookie-banner-close').addEventListener('click', function () {
+    banner.hidden = true;
+    try { localStorage.setItem(KEY, '1'); } catch (e) {}
+  });
+})();
+</script>
+
 <div class="app" id="app">
 
   <!-- ===================== HOME ===================== -->
@@ -539,6 +558,13 @@
       <svg viewBox="0 0 24 24"><path d="M12 2 4 5v6c0 5 3.5 9 8 11 4.5-2 8-6 8-11V5l-8-3z"/></svg>
     </div>
     <div class="li-body"><div class="li-title">Политика обработки персональных данных</div><div class="li-sub">Какие данные и зачем мы обрабатываем</div></div>
+    <div class="li-trail"><svg viewBox="0 0 24 24"><path d="M9 6l6 6-6 6"/></svg></div>
+  </a>
+  <a class="list-item" href="terms.html">
+    <div class="li-icon ico-blue">
+      <svg viewBox="0 0 24 24"><path d="M8 3h8a2 2 0 0 1 2 2v14l-2-1.5-2 1.5-2-1.5-2 1.5-2-1.5L6 19V5a2 2 0 0 1 2-2z"/><path d="M9 8h6M9 12h6"/></svg>
+    </div>
+    <div class="li-body"><div class="li-title">Пользовательское соглашение</div><div class="li-sub">Условия использования приложения</div></div>
     <div class="li-trail"><svg viewBox="0 0 24 24"><path d="M9 6l6 6-6 6"/></svg></div>
   </a>
 </div>

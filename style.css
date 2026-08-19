@@ -5015,3 +5015,51 @@
     box-shadow: var(--s-lg), 0 0 30px rgba(15, 133, 86, 0.12);
     border-color: rgba(15, 133, 86, 0.25)
   }
+
+/* ============================================================
+   COOKIE / LOCAL STORAGE NOTICE BANNER
+   ============================================================ */
+.cookie-banner {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  max-width: 430px;
+  margin: 0 auto;
+  z-index: 70;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: calc(var(--sa-top) + 10px) 14px 10px;
+  background: var(--surface-3);
+  backdrop-filter: var(--blur-glass);
+  -webkit-backdrop-filter: var(--blur-glass);
+  border-bottom: 1px solid var(--border);
+  box-shadow: var(--s-sm);
+}
+.cookie-banner[hidden] { display: none; }
+.cookie-banner-text {
+  flex: 1;
+  font-size: 12px;
+  line-height: 1.5;
+  color: var(--text-2);
+}
+.cookie-banner-text a { color: var(--brand-500); font-weight: 600; }
+.cookie-banner-close {
+  flex: none;
+  width: 28px;
+  height: 28px;
+  border-radius: var(--r-pill);
+  border: 1px solid var(--border);
+  background: var(--surface-2);
+  color: var(--text-2);
+  font-size: 16px;
+  line-height: 1;
+  cursor: pointer;
+}
+@media (min-width: 768px) {
+  .cookie-banner { max-width: 720px; }
+}
+@media (min-width: 1100px) {
+  .cookie-banner { max-width: 960px; }
+}
