@@ -716,14 +716,10 @@
   </div>
 
   <div style="padding:16px">
-    <div class="segmented" style="margin:0 0 14px">
-      <button type="button" class="seg on" data-act="tr-dir-ar">AR → RU</button>
-      <button type="button" class="seg" data-act="tr-dir-ru">RU → AR</button>
-    </div>
-    <textarea class="input" id="tr-input" placeholder="Введи слово..." style="min-height:80px;font-size:18px"></textarea>
-    <div class="muted" style="font-size:11.5px;line-height:1.5;margin-top:8px">Введённый текст отправляется стороннему сервису для перевода. Нажимая «Перевести», вы соглашаетесь с <a href="privacy.html" style="color:var(--brand-500)">политикой обработки персональных данных</a>.</div>
-    <button type="button" class="btn btn-primary" style="margin-top:10px" data-act="do-translate">Перевести</button>
-    <div id="tr-result" style="margin-top:16px;font-size:20px;font-family:var(--font-ar-classic);text-align:center;min-height:40px;color:var(--brand-600);font-weight:700"></div>
+    <textarea class="input" id="tr-input" dir="rtl" placeholder="أدخل الكلمة العربية..." style="min-height:80px;font-size:20px;font-family:var(--font-ar-classic)"></textarea>
+    <div class="muted" style="font-size:11.5px;line-height:1.5;margin-top:8px">Введённое слово отправляется стороннему сервису для составления словарной статьи. Нажимая «Найти», вы соглашаетесь с <a href="privacy.html" style="color:var(--brand-500)">политикой обработки персональных данных</a>.</div>
+    <button type="button" class="btn btn-primary" style="margin-top:10px" data-act="do-translate">Найти</button>
+    <div id="tr-result" dir="ltr" style="margin-top:16px;font-size:15px;line-height:1.8;text-align:left;white-space:pre-wrap;color:var(--text)"></div>
   </div>
 </section>
 <section id="s-irab" class="screen hidden">
