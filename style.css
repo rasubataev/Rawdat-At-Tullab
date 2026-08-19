@@ -5063,3 +5063,33 @@
 @media (min-width: 1100px) {
   .cookie-banner { max-width: 960px; }
 }
+
+/* ============================================================
+   AI RESULT CARD (словарь / и'раб / сарф)
+   ============================================================ */
+.ai-result {
+  margin-top: 16px;
+  padding: 16px 18px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--r-xl);
+  box-shadow: var(--s-card);
+  color: var(--text);
+  white-space: pre-wrap;
+  animation: ai-result-in 0.25s var(--ease-out);
+}
+.ai-result:empty {
+  display: none;
+}
+.ai-result.is-loading {
+  color: var(--text-3);
+  animation: ai-pulse 1.2s ease-in-out infinite;
+}
+@keyframes ai-result-in {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+@keyframes ai-pulse {
+  0%, 100% { opacity: 0.45; }
+  50% { opacity: 1; }
+}

@@ -5909,27 +5909,27 @@ case 'open-sarf': navigate('s-sarf'); break;
 case 'do-irab': {
   const text = $('#irab-input').value.trim();
   if (!text) { toast('Введи текст'); break; }
-  $('#irab-result').textContent = '...';
+  setAiLoading('#irab-result', 'Выполняю разбор…');
   analyzeIrab(text).then(res => {
-    $('#irab-result').textContent = res || 'Не удалось выполнить разбор';
+    setAiDone('#irab-result', res || 'Не удалось выполнить разбор');
   });
   break;
 }
 case 'do-sarf': {
   const text = $('#sarf-input').value.trim();
   if (!text) { toast('Введи текст'); break; }
-  $('#sarf-result').textContent = '...';
+  setAiLoading('#sarf-result', 'Выполняю разбор…');
   analyzeSarf(text).then(res => {
-    $('#sarf-result').textContent = res || 'Не удалось выполнить разбор';
+    setAiDone('#sarf-result', res || 'Не удалось выполнить разбор');
   });
   break;
 }
 case 'do-translate': {
   const text = $('#tr-input').value.trim();
   if (!text) { toast('Введи текст'); break; }
-  $('#tr-result').textContent = '...';
+  setAiLoading('#tr-result', 'Ищу слово…');
   lookupWord(text).then(res => {
-    $('#tr-result').textContent = res || 'Не удалось получить словарную статью';
+    setAiDone('#tr-result', res || 'Не удалось получить словарную статью');
   });
   break;
 }
@@ -9938,6 +9938,18 @@ if ('serviceWorker' in navigator) {
   });
 }
 const TRANSLATE_PROXY_URL = 'https://rawdat-tullab.z7gf59b4cn.workers.dev';
+
+function setAiLoading(sel, text) {
+  const el = $(sel);
+  el.textContent = text;
+  el.classList.add('is-loading');
+}
+
+function setAiDone(sel, text) {
+  const el = $(sel);
+  el.textContent = text;
+  el.classList.remove('is-loading');
+}
 
 async function callClaudeProxy(text, mode) {
   if (!text) return null;
