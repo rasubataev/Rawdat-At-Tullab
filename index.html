@@ -95,8 +95,8 @@
 <!-- Quick Tools -->
 <div class="quick-tools-row">
   <button type="button" class="quick-tool-btn qt-brand" data-act="open-translate">
-    <div class="quick-tool-icon"><svg viewBox="0 0 24 24"><path d="M3 5h12M9 3v2M5 8l4 4M21 12l-4 4m0 0l4 4m-4-4H7"/></svg></div>
-    <span class="quick-tool-label">Переводчик</span>
+    <div class="quick-tool-icon"><svg viewBox="0 0 24 24"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20M4 19.5A2.5 2.5 0 0 0 6.5 22H20V2H6.5A2.5 2.5 0 0 0 4 4.5v15Z"/></svg></div>
+    <span class="quick-tool-label">Словарь</span>
   </button>
   <button type="button" class="quick-tool-btn qt-purple" data-act="open-irab">
     <div class="quick-tool-icon"><svg viewBox="0 0 24 24"><path d="M4 6h16M4 12h10M4 18h16"/></svg></div>
@@ -711,19 +711,15 @@
     <button type="button" class="icon-btn" data-back>
       <svg viewBox="0 0 24 24"><path d="M15 6l-6 6 6 6"/></svg>
     </button>
-    <span class="topbar-title">Переводчик</span>
+    <span class="topbar-title">Словарь</span>
     <div style="width:38px"></div>
   </div>
-  
+
   <div style="padding:16px">
-    <div class="segmented" style="margin:0 0 14px">
-      <button type="button" class="seg on" data-act="tr-dir-ar">AR → RU</button>
-      <button type="button" class="seg" data-act="tr-dir-ru">RU → AR</button>
-    </div>
-    <textarea class="input" id="tr-input" placeholder="Введи слово..." style="min-height:80px;font-size:18px"></textarea>
-    <div class="muted" style="font-size:11.5px;line-height:1.5;margin-top:8px">Введённый текст отправляется стороннему сервису для перевода. Нажимая «Перевести», вы соглашаетесь с <a href="privacy.html" style="color:var(--brand-500)">политикой обработки персональных данных</a>.</div>
-    <button type="button" class="btn btn-primary" style="margin-top:10px" data-act="do-translate">Перевести</button>
-    <div id="tr-result" style="margin-top:16px;font-size:20px;font-family:var(--font-ar-classic);text-align:center;min-height:40px;color:var(--brand-600);font-weight:700"></div>
+    <textarea class="input" id="tr-input" dir="rtl" placeholder="أدخل الكلمة العربية..." style="min-height:80px;font-size:20px;font-family:var(--font-ar-classic)"></textarea>
+    <div class="muted" style="font-size:11.5px;line-height:1.5;margin-top:8px">Введённое слово отправляется стороннему сервису для составления словарной статьи. Нажимая «Найти», вы соглашаетесь с <a href="privacy.html" style="color:var(--brand-500)">политикой обработки персональных данных</a>.</div>
+    <button type="button" class="btn btn-primary" style="margin-top:10px" data-act="do-translate">Найти</button>
+    <div id="tr-result" dir="rtl" style="margin-top:16px;font-size:19px;line-height:1.9;font-family:var(--font-ar-classic);text-align:right;white-space:pre-wrap;color:var(--text)"></div>
   </div>
 </section>
 <section id="s-irab" class="screen hidden">
