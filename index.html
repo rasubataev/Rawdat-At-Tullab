@@ -506,6 +506,7 @@
 <div class="list-group" style="padding:14px 16px">
   <div class="muted" style="font-size:12.5px;line-height:1.5;margin-bottom:12px">
     Нашёл ошибку или хочешь предложить, что добавить в приложение? Напиши напрямую разработчику.
+    Кнопка открывает твой почтовый клиент — приложение не сохраняет и не передаёт твой email.
   </div>
   <a class="btn btn-secondary" style="display:flex;text-decoration:none" href="mailto:rbataev15@outlook.com?subject=Rawdat%20At-Tullab%20%E2%80%94%20%D0%9E%D1%82%D0%B7%D1%8B%D0%B2">
     <svg viewBox="0 0 24 24" style="width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;margin-right:6px"><path d="M4 4h16v16H4z"/><path d="m22 6-10 7L2 6"/></svg>
@@ -529,6 +530,17 @@
     <div class="li-body"><div class="li-title">Импорт данных</div><div class="li-sub">Восстановить из JSON</div></div>
     <div class="li-trail"><svg viewBox="0 0 24 24"><path d="M9 6l6 6-6 6"/></svg></div>
   </button>
+</div>
+
+<div class="section-head" style="padding-top:16px"><span class="eyebrow">Юридическая информация</span></div>
+<div class="list-group">
+  <a class="list-item" href="privacy.html">
+    <div class="li-icon ico-blue">
+      <svg viewBox="0 0 24 24"><path d="M12 2 4 5v6c0 5 3.5 9 8 11 4.5-2 8-6 8-11V5l-8-3z"/></svg>
+    </div>
+    <div class="li-body"><div class="li-title">Политика обработки персональных данных</div><div class="li-sub">Какие данные и зачем мы обрабатываем</div></div>
+    <div class="li-trail"><svg viewBox="0 0 24 24"><path d="M9 6l6 6-6 6"/></svg></div>
+  </a>
 </div>
 
 <div class="section-head" style="padding-top:16px"><span class="eyebrow">Опасная зона</span></div>
@@ -683,6 +695,7 @@
       <button type="button" class="seg" data-act="tr-dir-ru">RU → AR</button>
     </div>
     <textarea class="input" id="tr-input" placeholder="Введи слово..." style="min-height:80px;font-size:18px"></textarea>
+    <div class="muted" style="font-size:11.5px;line-height:1.5;margin-top:8px">Введённый текст отправляется стороннему сервису для перевода. Нажимая «Перевести», вы соглашаетесь с <a href="privacy.html" style="color:var(--brand-500)">политикой обработки персональных данных</a>.</div>
     <button type="button" class="btn btn-primary" style="margin-top:10px" data-act="do-translate">Перевести</button>
     <div id="tr-result" style="margin-top:16px;font-size:20px;font-family:var(--font-ar-classic);text-align:center;min-height:40px;color:var(--brand-600);font-weight:700"></div>
   </div>
@@ -698,6 +711,7 @@
 
   <div style="padding:16px">
     <textarea class="input" id="irab-input" dir="rtl" placeholder="أدخل الجملة أو الكلمة..." style="min-height:80px;font-size:20px;font-family:var(--font-ar-classic)"></textarea>
+    <div class="muted" style="font-size:11.5px;line-height:1.5;margin-top:8px">Введённый текст отправляется стороннему сервису для разбора. Нажимая «Разобрать», вы соглашаетесь с <a href="privacy.html" style="color:var(--brand-500)">политикой обработки персональных данных</a>.</div>
     <button type="button" class="btn btn-primary" style="margin-top:10px" data-act="do-irab">Разобрать</button>
     <div id="irab-result" dir="rtl" style="margin-top:16px;font-size:19px;line-height:1.9;font-family:var(--font-ar-classic);text-align:right;white-space:pre-wrap;color:var(--text)"></div>
   </div>
@@ -713,6 +727,7 @@
 
   <div style="padding:16px">
     <textarea class="input" id="sarf-input" dir="rtl" placeholder="أدخل الكلمة..." style="min-height:80px;font-size:20px;font-family:var(--font-ar-classic)"></textarea>
+    <div class="muted" style="font-size:11.5px;line-height:1.5;margin-top:8px">Введённый текст отправляется стороннему сервису для разбора. Нажимая «Разобрать», вы соглашаетесь с <a href="privacy.html" style="color:var(--brand-500)">политикой обработки персональных данных</a>.</div>
     <button type="button" class="btn btn-primary" style="margin-top:10px" data-act="do-sarf">Разобрать</button>
     <div id="sarf-result" dir="rtl" style="margin-top:16px;font-size:19px;line-height:1.9;font-family:var(--font-ar-classic);text-align:right;white-space:pre-wrap;color:var(--text)"></div>
   </div>
