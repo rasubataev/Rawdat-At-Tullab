@@ -5903,11 +5903,9 @@ case 'pr-pick': {
   renderPractice();
   break;
 }
-case 'open-translate':
-case 'open-irab':
-case 'open-sarf':
-  toast('Ведутся технические работы, функция временно недоступна');
-  break;
+case 'open-translate': navigate('s-translate'); break;
+case 'open-irab': navigate('s-irab'); break;
+case 'open-sarf': navigate('s-sarf'); break;
 case 'do-irab': {
   const text = $('#irab-input').value.trim();
   if (!text) { toast('Введи текст'); break; }
