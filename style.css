@@ -5093,3 +5093,17 @@
   0%, 100% { opacity: 0.45; }
   50% { opacity: 1; }
 }
+
+/* ============================================================
+   TEMPORARILY DISABLED AI TOOLS (тех. работы)
+   ============================================================ */
+.quick-tool-btn.maintenance {
+  opacity: 0.5;
+}
+.quick-tool-sub {
+  font-size: 9.5px;
+  font-weight: 600;
+  color: var(--text-3);
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+}
