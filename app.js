@@ -4635,6 +4635,7 @@ const USEFUL_APPS = [
 const $ = (s, r = document) => r.querySelector(s);
 const $$ = (s, r = document) => Array.from(r.querySelectorAll(s));
 const esc = s => String(s).replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
+const isArabicText = s => /[؀-ۿ]/.test(String(s));
 const DAY = 86400000;
 const now = () => Date.now();
 
@@ -5409,11 +5410,12 @@ function renderParts() {
     const total = (p.units || []).reduce((s, u) => s + (u.words?.length || 0), 0);
     const learned = (p.units || []).flatMap(u => u.words || []).filter(w => STATE.cards[keyOf(w[0])]?.flags?.learned).length;
     const pct = total ? Math.round(learned / total * 100) : 0;
+    const arTitle = isArabicText(p.title);
     return `
       <button type="button" class="list-item ${locked ? 'locked' : ''}" data-act="open-part" data-part="${p.id}">
         <div class="li-icon ico-brand" style="font-weight:800;font-size:15px">${p.num}</div>
         <div class="li-body">
-          <div class="li-title">${esc(p.title)}</div>
+          <div class="li-title${arTitle ? ' ar-title' : ''}"${arTitle ? ' dir="rtl"' : ''}>${esc(p.title)}</div>
           <div class="li-sub">${locked ? 'Скоро' : ''}</div>
           ${!locked && total ? `<div class="progress thin" style="margin-top:5px"><i style="width:${pct}%"></i></div>` : ''}
         </div>
@@ -5442,11 +5444,13 @@ function renderUnits() {
     const total = (u.words || []).length;
     const learned = (u.words || []).filter(w => STATE.cards[keyOf(w[0])]?.flags?.learned).length;
     const pct = total ? Math.round(learned / total * 100) : 0;
+    const uName = u.name || `Вахьда ${u.num}`;
+    const arTitle = isArabicText(uName);
     return `
       <button type="button" class="list-item ${locked ? 'locked' : ''}" data-act="open-unit" data-unit="${u.id}">
         <div class="li-icon ico-brand" style="font-weight:800;font-size:14px">${u.num}</div>
         <div class="li-body">
-          <div class="li-title">${esc(u.name || `Вахьда ${u.num}`)}</div>
+          <div class="li-title${arTitle ? ' ar-title' : ''}"${arTitle ? ' dir="rtl"' : ''}>${esc(uName)}</div>
           <div class="li-sub">${locked ? 'Скоро' : `${learned}/${total} · ${pct}%`}</div>
           ${!locked ? `<div class="progress thin" style="margin-top:5px"><i style="width:${pct}%"></i></div>` : ''}
         </div>

@@ -5107,3 +5107,16 @@
   text-transform: uppercase;
   letter-spacing: 0.02em;
 }
+
+/* ============================================================
+   ARABIC LIST TITLES (главы книг вроде Аль-Бина, Нуруль Уюн)
+   ============================================================ */
+.list-item .li-title.ar-title {
+  font-family: var(--font-ar);
+  font-size: 17px;
+  font-weight: 700;
+  line-height: 1.5;
+  white-space: normal;
+  overflow: visible;
+  text-overflow: clip;
+}
