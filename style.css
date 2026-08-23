@@ -297,6 +297,15 @@
     display: block;
   }
 
+  .pdf-native-frame {
+    display: block;
+    width: 100%;
+    height: 100%;
+    border: 0;
+    border-radius: var(--r-lg);
+    background: #fff;
+  }
+
   @media (min-width: 768px) {
     .pdf-frame-wrap {
       padding: 0 20px 20px;

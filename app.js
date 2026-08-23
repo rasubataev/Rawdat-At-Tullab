@@ -5326,7 +5326,13 @@ async function renderPdfReader() {
     const b = findBook(PDF_BOOK_ID);
     if (!b) return;
     $('#pdf-title').textContent = b.title;
-    src = b.pdfFile;
+    // Книги из BOOKS (pdfFile — обычный путь к файлу) открываем нативным
+    // просмотрщиком браузера через iframe, а не через pdf.js: он зависит
+    // от CDN cdnjs.cloudflare.com, который у части пользователей недоступен
+    // (провайдеры, блокировки), тогда как свой же PDF-файл браузер всегда
+    // открывает сам без сторонних скриптов.
+    container.innerHTML = `<iframe src="${esc(b.pdfFile)}" class="pdf-native-frame" title="${esc(b.title)}"></iframe>`;
+    return;
   }
 
   if (!window.pdfjsLib) {
