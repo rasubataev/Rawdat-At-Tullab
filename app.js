@@ -4602,8 +4602,9 @@ locked: false,
     { id: 'sira-p4', num: 4, title: 'وَفَاةُ النَّبِيِّ ﷺ', locked: false, units: [] },
   ],
 },
+{ id: 'muqaddama', ar: 'مقدمة', title: 'مقدمة', locked: false, available: true, isPdf: true, pdfFile: 'books/muqaddama.pdf' },
 
- 
+
 ];
 
 /* ===== ПОЛЕЗНЫЕ ССЫЛКИ И КАНАЛЫ ==================================
@@ -5215,7 +5216,7 @@ function renderLearn() {
 /* BOOKS */
 function renderBooks() {
   $('#books-list').innerHTML = `<div class="tile-grid" style="margin:12px 16px">` +
-  BOOKS.filter(b => !b.isPdf).map(b => {
+  BOOKS.map(b => {
     const locked = !!b.locked;
     const units = (b.parts || []).flatMap(p => p.units || []);
     const totalW = units.reduce((s, u) => s + (u.words?.length || 0), 0);
