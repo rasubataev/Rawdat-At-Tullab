@@ -5122,3 +5122,83 @@
   overflow: visible;
   text-overflow: clip;
 }
+
+/* ============================================================
+   DICTIONARY RESULT CARD (раздел «Словарь»)
+   ============================================================ */
+#tr-result.ai-result {
+  white-space: normal;
+}
+
+.dict-entry {
+  padding: 12px 0;
+  border-bottom: 1px solid var(--border);
+}
+.dict-entry:last-of-type {
+  border-bottom: none;
+}
+.dict-entry-head {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+}
+.dict-entry-word {
+  font-family: var(--font-ar-classic);
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--text);
+}
+.dict-entry-tag {
+  font-family: var(--font-ui);
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--brand-500);
+  background: var(--surface-2);
+  border-radius: var(--r-pill);
+  padding: 2px 9px;
+  white-space: nowrap;
+}
+.dict-entry-ru {
+  margin-top: 5px;
+  font-family: var(--font-ui);
+  font-size: 14px;
+  line-height: 1.55;
+  color: var(--text-2);
+}
+
+.dict-related {
+  margin-top: 14px;
+  padding-top: 14px;
+  border-top: 1px solid var(--border);
+}
+.dict-related-title {
+  font-family: var(--font-ui);
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--brand-400);
+  margin-bottom: 8px;
+}
+.dict-related-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 10px;
+  padding: 5px 0;
+}
+.dict-related-word {
+  font-family: var(--font-ar-classic);
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--text);
+  flex-shrink: 0;
+}
+.dict-related-ru {
+  font-family: var(--font-ui);
+  font-size: 13.5px;
+  color: var(--text-3);
+}
+
+.dict-plain {
+  font-family: var(--font-ar-classic);
+  white-space: pre-wrap;
+}

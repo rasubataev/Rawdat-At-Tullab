@@ -5933,7 +5933,11 @@ case 'do-translate': {
   if (!text) { toast('Введи текст'); break; }
   setAiLoading('#tr-result', 'Ищу слово…');
   lookupWord(text).then(res => {
-    setAiDone('#tr-result', res || 'Не удалось получить словарную статью');
+    if (res) {
+      setAiDoneHTML('#tr-result', renderDictResult(res));
+    } else {
+      setAiDone('#tr-result', 'Не удалось получить словарную статью');
+    }
   });
   break;
 }
@@ -9953,6 +9957,59 @@ function setAiDone(sel, text) {
   const el = $(sel);
   el.textContent = text;
   el.classList.remove('is-loading');
+}
+
+function setAiDoneHTML(sel, html) {
+  const el = $(sel);
+  el.innerHTML = html;
+  el.classList.remove('is-loading');
+}
+
+// Разбирает ответ словаря (формат "слово — помета\nперевод", записи через
+// строку из ─/═/-, в конце опционально "Возможные однокоренные слова:")
+// в вёрстку карточек. Если текст не похож на этот формат — просто
+// показывает его как есть.
+function renderDictResult(raw) {
+  const text = String(raw || '').trim();
+  if (!text) return '';
+
+  const parts = text.split(/^Возможные однокоренные слова:?$/im);
+  const mainText = parts[0].trim();
+  const relatedText = (parts[1] || '').trim();
+
+  const blocks = mainText.split(/\n[─═_\-]{3,}\n?/).map(b => b.trim()).filter(Boolean);
+  if (!blocks.length) return `<div class="dict-plain">${esc(text)}</div>`;
+
+  const entriesHTML = blocks.map(block => {
+    const lines = block.split('\n').map(l => l.trim()).filter(Boolean);
+    if (!lines.length) return '';
+    const headMatch = lines[0].match(/^(.+?)\s+[—-]\s+(.+)$/);
+    const word = headMatch ? headMatch[1].trim() : lines[0];
+    const tag = headMatch ? headMatch[2].trim() : '';
+    const ruLines = lines.slice(1).map(esc);
+    return `<div class="dict-entry">
+      <div class="dict-entry-head">
+        <span class="dict-entry-word">${esc(word)}</span>
+        ${tag ? `<span class="dict-entry-tag">${esc(tag)}</span>` : ''}
+      </div>
+      ${ruLines.length ? `<div class="dict-entry-ru">${ruLines.join('<br>')}</div>` : ''}
+    </div>`;
+  }).join('');
+
+  let relatedHTML = '';
+  if (relatedText) {
+    const relRows = relatedText.split('\n').map(l => l.trim()).filter(Boolean).map(line => {
+      const m = line.match(/^(.+?)\s+[—-]\s+(.+)$/);
+      if (!m) return `<div class="dict-related-row"><span class="dict-related-word">${esc(line)}</span></div>`;
+      return `<div class="dict-related-row"><span class="dict-related-word">${esc(m[1].trim())}</span><span class="dict-related-ru">${esc(m[2].trim())}</span></div>`;
+    }).join('');
+    relatedHTML = `<div class="dict-related">
+      <div class="dict-related-title">Возможные однокоренные слова</div>
+      ${relRows}
+    </div>`;
+  }
+
+  return entriesHTML + relatedHTML;
 }
 
 async function callClaudeProxy(text, mode) {
