@@ -4619,14 +4619,14 @@ locked: false,
 const USEFUL_LINKS = [
   { id: 'faharis', title: 'فهرس جامع الكتب المصورة', desc: 'Библиотека книг PDF в Telegram', url: 'https://t.me/faharisalkutub' },
   { id: 'shkutub', title: 'خزانة الشافعية', desc: 'Большая библиотека книг по мазхабу имама Шафии', url: 'https://t.me/Shkutub' },
-  { id: 'dars-asvad', title: 'كنز الراغبين / أ.د أسود', desc: 'Канзур Рагъибин — записи от устаза Асвада на чеченском', url: 'https://t.me/dars_asvad' },
-  { id: 'rawdat-app', title: 'Rawdat At-Tullab', desc: 'Наш канал: книги из программы и переводы на чеченский', url: 'https://t.me/rawdatapp' },
 ];
 
-const USEFUL_APPS = [
-  { id: 'arabus', title: 'Арабус', desc: 'Арабско-русский словарь — перевод слов', url: 'https://apps.apple.com/kz/app/%D0%B0%D1%80%D0%B0%D0%B1%D1%83%D1%81-%D0%B0%D1%80%D0%B0%D0%B1%D1%81%D0%BA%D0%BE-%D1%80%D1%83%D1%81%D1%81%D0%BA%D0%B8%D0%B9-%D1%81%D0%BB%D0%BE%D0%B2%D0%B0%D1%80%D1%8C/id741293784' },
-  { id: 'al-bahith', title: 'الباحث القرآني', desc: 'Поиск по Корану — тафсиры и кыраты', url: 'https://apps.apple.com/in/app/%D8%A7%D9%84%D8%A8%D8%A7%D8%AD%D8%AB-%D8%A7%D9%84%D9%82%D8%B1%D8%A2%D9%86%D9%8A/id1450111969' },
-  { id: 'maani', title: 'معجم المعاني', desc: 'Значения слов и все их формы', url: 'https://apps.apple.com/kz/app/%D9%85%D8%B9%D8%AC%D9%85-%D8%A7%D9%84%D9%85%D8%B9%D8%A7%D9%86%D9%8A-%D8%B9%D8%B1%D8%A8%D9%8A-%D8%B9%D8%B1%D8%A8%D9%8A/id952606463' },
+const USEFUL_APPS = [];
+
+// Соцсети Rawdat At-Tullab — отдельные "красивые" кнопки на экране «Полезные ссылки».
+const SOCIAL_LINKS = [
+  { id: 'instagram', title: 'Instagram', desc: '@rawdat.app', url: 'https://www.instagram.com/rawdat.app/', color: '#E1306C' },
+  { id: 'telegram', title: 'Telegram', desc: 'Наш канал', url: 'https://t.me/rawdatapp', color: '#29A9EA' },
 ];
 
 
@@ -5282,6 +5282,18 @@ function linkItemHTML(l, kind) {
   `;
 }
 
+function socialLinkHTML(l) {
+  const icon = l.id === 'instagram'
+    ? `<svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="1" fill="currentColor" stroke="none"/></svg>`
+    : `<svg viewBox="0 0 24 24"><path d="M22 2 11 13M22 2l-7 20-4-9-9-4 20-7Z"/></svg>`;
+  return `
+    <button type="button" class="social-btn" data-act="open-link" data-url="${esc(l.url)}" style="--social-color:${l.color}">
+      <div class="social-btn-icon">${icon}</div>
+      <div class="social-btn-body"><div class="social-btn-title">${esc(l.title)}</div><div class="social-btn-sub">${esc(l.desc)}</div></div>
+    </button>
+  `;
+}
+
 function renderLinks() {
   if (!USEFUL_LINKS.length && !USEFUL_APPS.length) {
     $('#links-list').innerHTML = `<div class="empty-state"><div class="es-icon"><svg viewBox="0 0 24 24"><path d="M10 13a5 5 0 0 0 7.07 0l2.83-2.83a5 5 0 0 0-7.07-7.07L11 4.93"/><path d="M14 11a5 5 0 0 0-7.07 0L4.1 13.83a5 5 0 0 0 7.07 7.07L13 19.07"/></svg></div><div class="es-title">Пока пусто</div><div class="es-text">Скоро здесь появятся ссылки на каналы</div></div>`;
@@ -5289,8 +5301,12 @@ function renderLinks() {
   }
 
   let html = '';
+  if (SOCIAL_LINKS.length) {
+    html += `<div class="section-head"><span class="eyebrow">Мы в соцсетях</span></div>
+    <div class="social-row" style="margin:0 16px">${SOCIAL_LINKS.map(socialLinkHTML).join('')}</div>`;
+  }
   if (USEFUL_LINKS.length) {
-    html += `<div class="section-head"><span class="eyebrow">Каналы</span></div>
+    html += `<div class="section-head" style="${SOCIAL_LINKS.length ? 'padding-top:16px' : ''}"><span class="eyebrow">Каналы</span></div>
     <div class="list-group" style="margin:0 16px">${USEFUL_LINKS.map(l => linkItemHTML(l, 'channel')).join('')}</div>`;
   }
   if (USEFUL_APPS.length) {
