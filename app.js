@@ -9994,6 +9994,30 @@ const TRANSLATE_PROXY_URL = 'https://rawdat-tullab.z7gf59b4cn.workers.dev';
   } catch (e) {}
 })();
 
+// Объявления от админа: при каждом запуске приложение спрашивает у воркера,
+// не появилось ли новое сообщение (например, "добавили новую книгу"), и
+// показывает его тостом + нативным уведомлением, если они включены в
+// настройках. Это не push в закрытое приложение — сообщение доходит при
+// следующем открытии, зато не требует Web Push подписок.
+(function checkAnnouncement() {
+  fetch(`${TRANSLATE_PROXY_URL}/announce/get`)
+    .then(r => r.json())
+    .then(a => {
+      if (!a || !a.id || !a.text) return;
+      if (STATE.lastAnnounceId === a.id) return;
+      STATE.lastAnnounceId = a.id;
+      saveState();
+      toast(a.text);
+      if (STATE.settings?.notifications && 'Notification' in window && Notification.permission === 'granted') {
+        try {
+          const n = new Notification('Rawdat At-Tullab', { body: a.text, icon: 'icons/logo.PNG' });
+          if (a.url) n.onclick = () => window.open(a.url, '_blank');
+        } catch (e) {}
+      }
+    })
+    .catch(() => {});
+})();
+
 function setAiLoading(sel, text) {
   const el = $(sel);
   el.textContent = text;
