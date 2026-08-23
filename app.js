@@ -9970,6 +9970,30 @@ if ('serviceWorker' in navigator) {
 }
 const TRANSLATE_PROXY_URL = 'https://rawdat-tullab.z7gf59b4cn.workers.dev';
 
+// Анонимная статистика посещений: случайный идентификатор устройства,
+// который никогда никуда не передаётся, кроме как для подсчёта "сколько
+// разных устройств заходило сегодня" — сервер использует его как одноразовый
+// ключ на 24 часа и не хранит его дольше и не связывает ни с чем ещё.
+// Пингуем не чаще раза в день, чтобы не слать лишние запросы.
+(function pingStats() {
+  try {
+    if (!STATE.anonId) {
+      STATE.anonId = (crypto.randomUUID ? crypto.randomUUID() : `${Date.now()}-${Math.random().toString(36).slice(2)}`);
+      saveState();
+    }
+    const today = new Date().toISOString().slice(0, 10);
+    if (STATE.lastStatsPing === today) return;
+    fetch(`${TRANSLATE_PROXY_URL}/stats/ping`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ anonId: STATE.anonId }),
+    }).then(() => {
+      STATE.lastStatsPing = today;
+      saveState();
+    }).catch(() => {});
+  } catch (e) {}
+})();
+
 function setAiLoading(sel, text) {
   const el = $(sel);
   el.textContent = text;
