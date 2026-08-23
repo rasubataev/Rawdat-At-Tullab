@@ -4602,7 +4602,7 @@ locked: false,
     { id: 'sira-p4', num: 4, title: 'وَفَاةُ النَّبِيِّ ﷺ', locked: false, units: [] },
   ],
 },
-{ id: 'muqaddama', ar: 'مقدمة', title: 'مقدمة', locked: false, available: true, isPdf: true, pdfFile: 'books/muqaddama.pdf' },
+{ id: 'muqaddama', ar: 'مقدمة', title: 'مقدمة', cover: 'icons/muqaddama.jpg', locked: false, available: true, isPdf: true, pdfFile: 'books/muqaddama.pdf' },
 
 
 ];
