@@ -5747,6 +5747,19 @@ function toggleTheme() {
   toast(STATE.settings.theme === 'dark' ? 'Тёмная тема' : 'Светлая тема');
 }
 
+/* ===== СКРЫТЫЙ ВХОД В АДМИНКУ (7 тапов по номеру версии) ========== */
+let VERSION_TAPS = 0, VERSION_TAP_T = 0;
+function versionTap() {
+  clearTimeout(VERSION_TAP_T);
+  VERSION_TAPS++;
+  if (VERSION_TAPS >= 7) {
+    VERSION_TAPS = 0;
+    window.open('admin.html', '_blank');
+    return;
+  }
+  VERSION_TAP_T = setTimeout(() => { VERSION_TAPS = 0; }, 2500);
+}
+
 /* ===== NOTIFICATIONS ============================================= */
 async function toggleNotifications() {
   const turningOn = !STATE.settings?.notifications;
@@ -5909,6 +5922,7 @@ document.addEventListener('click', e => {
   if (!act) return;
   switch (act) {
 
+    case 'version-tap': versionTap(); break;
     case 'open-book': openBook(t.dataset.book); break;
     case 'open-part': openPart(t.dataset.part); break;
     case 'open-lesson': openLesson(t.dataset.lesson); break;
@@ -5937,9 +5951,9 @@ case 'pr-pick': {
   renderPractice();
   break;
 }
-case 'open-translate': navigate('s-translate'); break;
-case 'open-irab': navigate('s-irab'); break;
-case 'open-sarf': navigate('s-sarf'); break;
+case 'open-translate': if (FEATURE_FLAGS.translate === false) { toast('Временно недоступно'); break; } navigate('s-translate'); break;
+case 'open-irab': if (FEATURE_FLAGS.irab === false) { toast('Временно недоступно'); break; } navigate('s-irab'); break;
+case 'open-sarf': if (FEATURE_FLAGS.sarf === false) { toast('Временно недоступно'); break; } navigate('s-sarf'); break;
 case 'do-irab': {
   const text = $('#irab-input').value.trim();
   if (!text) { toast('Введи текст'); break; }
@@ -9976,6 +9990,32 @@ if ('serviceWorker' in navigator) {
   });
 }
 const TRANSLATE_PROXY_URL = 'https://rawdat-tullab.z7gf59b4cn.workers.dev';
+
+// Включение/выключение отдельных функций из админ-панели (например, если
+// кончился баланс на API языковой модели) — без публикации новой версии
+// сайта. Отсутствующий ключ = функция включена (fail-open).
+let FEATURE_FLAGS = {};
+(function loadFeatureFlags() {
+  fetch(`${TRANSLATE_PROXY_URL}/flags/get`)
+    .then(r => r.json())
+    .then(flags => {
+      FEATURE_FLAGS = flags || {};
+      const MAP = { translate: 'open-translate', irab: 'open-irab', sarf: 'open-sarf' };
+      for (const key in MAP) {
+        if (FEATURE_FLAGS[key] !== false) continue;
+        const btn = document.querySelector(`[data-act="${MAP[key]}"]`);
+        if (!btn) continue;
+        btn.classList.add('maintenance');
+        const label = btn.querySelector('.quick-tool-label');
+        if (label) label.insertAdjacentHTML('afterend', '<div class="quick-tool-sub">Недоступно</div>');
+      }
+      if (FEATURE_FLAGS.donate === false) {
+        document.getElementById('donate-section-head')?.style.setProperty('display', 'none');
+        document.getElementById('donate-section')?.style.setProperty('display', 'none');
+      }
+    })
+    .catch(() => {});
+})();
 
 // Объявления от админа: при каждом запуске приложение спрашивает у воркера,
 // не появилось ли новое сообщение (например, "добавили новую книгу"), и
