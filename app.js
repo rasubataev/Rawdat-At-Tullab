@@ -5860,39 +5860,6 @@ function sheetEditWord(deckId, idx) {
   `);
 }
 
-/* ===== EXPORT / IMPORT ========================================== */
-function exportData() {
-  try {
-    const exportable = JSON.parse(JSON.stringify(STATE));
-    delete exportable.settings?.geminiKey;
-    const blob = new Blob([JSON.stringify(exportable, null, 2)], { type: 'application/json' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url; a.download = `darul-hadis-${todayKey()}.json`;
-    document.body.appendChild(a); a.click(); a.remove();
-    setTimeout(() => URL.revokeObjectURL(url), 1000);
-    toast('Экспортировано');
-  } catch(e) { toast('Ошибка экспорта'); }
-}
-
-function importData() {
-  const inp = document.createElement('input'); inp.type = 'file'; inp.accept = 'application/json';
-  inp.onchange = () => {
-    const f = inp.files?.[0]; if (!f) return;
-    const r = new FileReader();
-    r.onload = () => {
-      try {
-        const p = JSON.parse(r.result);
-        if (!p || !p.version) throw new Error('bad');
-        STATE = p; saveState(); applyTheme(STATE.settings?.theme || 'dark');
-        navigate('s-home', { stack: false }); renderHome(); toast('Импортировано');
-      } catch(e) { toast('Неверный файл'); }
-    };
-    r.readAsText(f);
-  };
-  inp.click();
-}
-
 function resetData() {
   if (!confirm('Удалить весь прогресс? Это необратимо.')) return;
   [SK, 'dhp.v2', 'dhp_hard', 'dhp_decks', 'dhp_studied'].forEach(k => localStorage.removeItem(k));
@@ -5934,8 +5901,6 @@ document.addEventListener('click', e => {
     case 'toggle-fav': toggleFav(t.dataset.ar); break;
     case 'close-sheet': closeSheet(); break;
     case 'flip': revealCard(); break;
-    case 'export-data': exportData(); break;
-    case 'import-data': importData(); break;
     case 'reset-data': resetData(); break;
     case 'coming-soon': toast('Скоро'); break;
     case 'go-books': navigate('s-books'); break;
