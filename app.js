@@ -5740,6 +5740,19 @@ function toggleTheme() {
   toast(STATE.settings.theme === 'dark' ? 'Тёмная тема' : 'Светлая тема');
 }
 
+/* ===== СКРЫТЫЙ ВХОД В АДМИНКУ (7 тапов по номеру версии) ========== */
+let VERSION_TAPS = 0, VERSION_TAP_T = 0;
+function versionTap() {
+  clearTimeout(VERSION_TAP_T);
+  VERSION_TAPS++;
+  if (VERSION_TAPS >= 7) {
+    VERSION_TAPS = 0;
+    window.open('admin.html', '_blank');
+    return;
+  }
+  VERSION_TAP_T = setTimeout(() => { VERSION_TAPS = 0; }, 2500);
+}
+
 /* ===== NOTIFICATIONS ============================================= */
 async function toggleNotifications() {
   const turningOn = !STATE.settings?.notifications;
@@ -5901,7 +5914,8 @@ document.addEventListener('click', e => {
   const act = t.getAttribute('data-act');
   if (!act) return;
   switch (act) {
-    
+
+    case 'version-tap': versionTap(); break;
     case 'open-book': openBook(t.dataset.book); break;
     case 'open-part': openPart(t.dataset.part); break;
     case 'open-lesson': openLesson(t.dataset.lesson); break;
