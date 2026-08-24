@@ -5416,7 +5416,14 @@ function openBook(id) {
   const b = findBook(id);
   if (!b || b.locked) { toast('Скоро будет доступна'); return; }
   if (b.isDua) { navigate('s-dua'); return; }
-  if (b.isPdf) { PDF_SOURCE = 'book'; PDF_BOOK_ID = id; navigate('s-pdf'); return; }
+  if (b.isPdf) {
+    // Открываем PDF напрямую в браузере (родной просмотрщик на весь экран
+    // с масштабированием и постраничной прокруткой), а не встраиваем во
+    // фрейм внутри приложения — на телефонах встроенный вариант обрезает
+    // страницу по границам и не даёт нормально листать.
+    window.open(b.pdfFile, '_blank');
+    return;
+  }
   if (!STATE.recentBooks) STATE.recentBooks = [];
   STATE.recentBooks = [id, ...STATE.recentBooks.filter(r => r !== id)].slice(0, 4);
   saveState();
