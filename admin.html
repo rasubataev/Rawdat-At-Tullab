@@ -132,17 +132,14 @@ function unlock() {
     loadAnnouncement();
     loadFlags();
     loadLinks();
+  }).catch(e => {
+    document.getElementById('gate-msg').textContent = 'Не удалось связаться с сервером: ' + e.message;
   });
 }
 
 async function verifyKey() {
-  try {
-    const res = await fetch(`${PROXY}/admin/verify?key=${encodeURIComponent(KEY)}`);
-    return res.ok;
-  } catch (e) {
-    document.getElementById('gate-msg').textContent = 'Не удалось связаться с сервером: ' + e.message;
-    return false;
-  }
+  const res = await fetch(`${PROXY}/admin/verify?key=${encodeURIComponent(KEY)}`);
+  return res.ok;
 }
 
 function renderFlags() {
