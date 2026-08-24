@@ -23,10 +23,6 @@
   .admin-field textarea{min-height:80px;resize:vertical}
   .admin-row{display:flex;gap:10px}
   .admin-row .btn{flex:1}
-  .stat-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px}
-  .stat-tile{background:var(--surface-2);border-radius:var(--r-md);padding:12px;text-align:center}
-  .stat-tile .num{font-size:22px;font-weight:800;color:var(--brand-500)}
-  .stat-tile .lbl{font-size:11px;color:var(--text-3);margin-top:2px}
   .admin-msg{font-size:12.5px;margin-top:10px;min-height:16px}
   .admin-msg.ok{color:var(--brand-500)}
   .admin-msg.err{color:var(--danger)}
@@ -47,16 +43,6 @@
 
 <div class="admin-wrap" id="panel" style="display:none">
   <h1>Админ-панель</h1>
-
-  <div class="admin-card">
-    <h2>Статистика посещений</h2>
-    <div class="stat-grid">
-      <div class="stat-tile"><div class="num" id="st-today">—</div><div class="lbl">устройств сегодня</div></div>
-      <div class="stat-tile"><div class="num" id="st-views">—</div><div class="lbl">визитов сегодня</div></div>
-      <div class="stat-tile"><div class="num" id="st-total">—</div><div class="lbl">всего устройств</div></div>
-    </div>
-    <div class="admin-msg" id="stats-msg"></div>
-  </div>
 
   <div class="admin-card">
     <h2>Текущее объявление</h2>
@@ -92,9 +78,9 @@ function unlock() {
   const k = document.getElementById('gate-key').value.trim();
   if (!k) return;
   KEY = k;
-  loadStats().then(ok => {
+  verifyKey().then(ok => {
     if (!ok) {
-      document.getElementById('gate-msg').textContent = 'Неверный ключ или KV не настроен';
+      document.getElementById('gate-msg').textContent = 'Неверный ключ';
       return;
     }
     try { sessionStorage.setItem('rawdat-admin-key', k); } catch (e) {}
@@ -104,20 +90,12 @@ function unlock() {
   });
 }
 
-async function loadStats() {
-  const msg = document.getElementById('stats-msg');
+async function verifyKey() {
   try {
-    const res = await fetch(`${PROXY}/stats/summary?key=${encodeURIComponent(KEY)}`);
-    if (!res.ok) { msg.textContent = ''; msg.className = 'admin-msg'; return false; }
-    const data = await res.json();
-    document.getElementById('st-today').textContent = data.visitors_today ?? '0';
-    document.getElementById('st-views').textContent = data.pageviews_today ?? '0';
-    document.getElementById('st-total').textContent = data.unique_visitors_total ?? '0';
-    msg.textContent = '';
-    return true;
+    const res = await fetch(`${PROXY}/admin/verify?key=${encodeURIComponent(KEY)}`);
+    return res.ok;
   } catch (e) {
-    msg.textContent = 'Не удалось загрузить статистику: ' + e.message;
-    msg.className = 'admin-msg err';
+    document.getElementById('gate-msg').textContent = 'Не удалось связаться с сервером: ' + e.message;
     return false;
   }
 }
