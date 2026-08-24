@@ -37,6 +37,12 @@
   .flag-switch .thumb{position:absolute;top:2px;left:2px;width:18px;height:18px;border-radius:50%;background:var(--text-3);transition:transform .15s,background .15s}
   .flag-switch input:checked + .track{background:var(--brand-500);border-color:var(--brand-500)}
   .flag-switch input:checked + .track + .thumb{transform:translateX(16px);background:#fff}
+  .link-row{position:relative;background:var(--surface-2);border:1px solid var(--border);border-radius:var(--r-md);padding:12px;margin-bottom:10px}
+  .link-row .admin-field{margin-bottom:8px}
+  .link-row .admin-field:last-child{margin-bottom:0}
+  .link-row-del{position:absolute;top:8px;right:8px;width:26px;height:26px;border-radius:50%;border:none;background:var(--surface);color:var(--text-3);font-size:15px;line-height:1;cursor:pointer;display:flex;align-items:center;justify-content:center}
+  .link-row-del:active{background:var(--danger);color:#fff}
+  .links-empty{font-size:12.5px;color:var(--text-3);font-style:italic;padding:8px 0}
   #gate{max-width:340px;margin:20vh auto 0;padding:0 20px;text-align:center}
   #gate h1{font-size:18px;margin-bottom:16px}
 </style>
@@ -60,6 +66,17 @@
     </p>
     <div id="flags-list"></div>
     <div class="admin-msg" id="flags-msg"></div>
+  </div>
+
+  <div class="admin-card">
+    <h2>Полезные ссылки</h2>
+    <p style="font-size:12px;color:var(--text-3);margin:0 0 12px">
+      Список на экране «Полезные ссылки» в приложении. Пустой список — вернётся набор по умолчанию.
+    </p>
+    <div id="links-editor"></div>
+    <button type="button" class="btn btn-secondary" style="width:100%;margin-top:4px" onclick="addLinkRow()">+ Добавить ссылку</button>
+    <button type="button" class="btn btn-primary" style="width:100%;margin-top:10px" onclick="saveLinks()">Сохранить список</button>
+    <div class="admin-msg" id="links-msg"></div>
   </div>
 
   <div class="admin-card">
@@ -114,6 +131,7 @@ function unlock() {
     document.getElementById('panel').style.display = 'block';
     loadAnnouncement();
     loadFlags();
+    loadLinks();
   });
 }
 
@@ -170,6 +188,80 @@ async function onFlagToggle(input) {
       body: JSON.stringify(body),
     });
     if (!res.ok) throw new Error('HTTP ' + res.status);
+    msg.textContent = 'Сохранено'; msg.className = 'admin-msg ok';
+  } catch (e) {
+    msg.textContent = 'Ошибка: ' + e.message; msg.className = 'admin-msg err';
+  }
+}
+
+let LINKS = [];
+
+function renderLinksEditor() {
+  const box = document.getElementById('links-editor');
+  if (!LINKS.length) {
+    box.innerHTML = '<div class="links-empty">Список пуст — в приложении покажется набор по умолчанию.</div>';
+    return;
+  }
+  box.innerHTML = LINKS.map((l, i) => `
+    <div class="link-row">
+      <button type="button" class="link-row-del" onclick="removeLinkRow(${i})" aria-label="Удалить">×</button>
+      <div class="admin-field">
+        <label>Название</label>
+        <input type="text" value="${escAttr(l.title)}" oninput="LINKS[${i}].title = this.value">
+      </div>
+      <div class="admin-field">
+        <label>Описание (необязательно)</label>
+        <input type="text" value="${escAttr(l.desc || '')}" oninput="LINKS[${i}].desc = this.value">
+      </div>
+      <div class="admin-field">
+        <label>Ссылка</label>
+        <input type="text" value="${escAttr(l.url)}" oninput="LINKS[${i}].url = this.value">
+      </div>
+    </div>
+  `).join('');
+}
+
+function escAttr(s) {
+  return String(s).replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;');
+}
+
+function addLinkRow() {
+  LINKS.push({ id: '', title: '', desc: '', url: '' });
+  renderLinksEditor();
+}
+
+function removeLinkRow(i) {
+  LINKS.splice(i, 1);
+  renderLinksEditor();
+}
+
+async function loadLinks() {
+  const msg = document.getElementById('links-msg');
+  try {
+    const res = await fetch(`${PROXY}/links/get`);
+    LINKS = await res.json();
+    if (!Array.isArray(LINKS)) LINKS = [];
+    renderLinksEditor();
+  } catch (e) {
+    msg.textContent = 'Не удалось загрузить: ' + e.message;
+    msg.className = 'admin-msg err';
+  }
+}
+
+async function saveLinks() {
+  const msg = document.getElementById('links-msg');
+  const clean = LINKS.filter(l => l.title.trim() && l.url.trim());
+  msg.textContent = 'Сохраняю…'; msg.className = 'admin-msg';
+  try {
+    const res = await fetch(`${PROXY}/links/set?key=${encodeURIComponent(KEY)}`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(clean),
+    });
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    const data = await res.json();
+    LINKS = data.links || clean;
+    renderLinksEditor();
     msg.textContent = 'Сохранено'; msg.className = 'admin-msg ok';
   } catch (e) {
     msg.textContent = 'Ошибка: ' + e.message; msg.className = 'admin-msg err';

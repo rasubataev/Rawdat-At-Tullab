@@ -4616,7 +4616,9 @@ locked: false,
       (латиницей, без пробелов), title — название, url — сама ссылка;
    2) сохрани/закоммить app.js как обычно.
    Чтобы убрать ссылку — удали её строку отсюда. */
-const USEFUL_LINKS = [
+// Значение по умолчанию, пока не подтянулся список с сервера (см. loadUsefulLinks
+// в самом низу файла) — и запасной вариант, если сервер недоступен.
+let USEFUL_LINKS = [
   { id: 'faharis', title: 'فهرس جامع الكتب المصورة', desc: 'Библиотека книг PDF в Telegram', url: 'https://t.me/faharisalkutub' },
   { id: 'shkutub', title: 'خزانة الشافعية', desc: 'Большая библиотека книг по мазхабу имама Шафии', url: 'https://t.me/Shkutub' },
 ];
@@ -10012,6 +10014,23 @@ let FEATURE_FLAGS = {};
       if (FEATURE_FLAGS.donate === false) {
         document.getElementById('donate-section-head')?.style.setProperty('display', 'none');
         document.getElementById('donate-section')?.style.setProperty('display', 'none');
+      }
+    })
+    .catch(() => {});
+})();
+
+// «Полезные ссылки» тоже можно редактировать из админ-панели без публикации
+// новой версии сайта — если сервер вернул непустой список, он заменяет
+// встроенный по умолчанию. Если экран уже открыт, перерисовываем его.
+(function loadUsefulLinks() {
+  fetch(`${TRANSLATE_PROXY_URL}/links/get`)
+    .then(r => r.json())
+    .then(links => {
+      if (Array.isArray(links) && links.length) {
+        USEFUL_LINKS = links;
+        if (document.getElementById('s-links')?.classList.contains('screen') && !document.getElementById('s-links').classList.contains('hidden')) {
+          renderLinks();
+        }
       }
     })
     .catch(() => {});
