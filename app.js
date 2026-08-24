@@ -9991,7 +9991,7 @@ if ('serviceWorker' in navigator) {
     navigator.serviceWorker.register('/sw.js').catch(e => console.error('SW registration failed', e));
   });
 }
-const TRANSLATE_PROXY_URL = 'https://rawdat-tullab.z7gf59b4cn.workers.dev';
+const TRANSLATE_PROXY_URL = 'https://rawdatru.z7gf59b4cn.workers.dev';
 
 // Включение/выключение отдельных функций из админ-панели (например, если
 // кончился баланс на API языковой модели) — без публикации новой версии
