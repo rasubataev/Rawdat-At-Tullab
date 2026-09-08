@@ -10105,14 +10105,21 @@ function renderDictResult(raw) {
 
   let extraHTML = '';
   if (extraText) {
-    const extraRows = extraText.split('\n').map(l => l.trim()).filter(Boolean).map(line => {
+    const extraGroups = extraText.split('\n').map(l => l.trim()).filter(Boolean).map(line => {
       const m = line.match(/^([^:]+):\s*(.+)$/);
       if (!m) return '';
-      return `<div class="dict-related-row"><span style="font-family:var(--font-ui);font-size:13px;color:var(--text-2);flex-shrink:0">${esc(m[1].trim())}</span><span class="dict-related-ru">${esc(m[2].trim())}</span></div>`;
+      const label = m[1].trim();
+      const items = m[2].split(';').map(x => x.trim()).filter(Boolean);
+      const itemRows = items.map(item => {
+        const im = item.match(/^(.+?)\s+[—-]\s+(.+)$/);
+        if (!im) return `<div class="dict-related-row"><span class="dict-related-word">${esc(item)}</span></div>`;
+        return `<div class="dict-related-row"><span class="dict-related-word">${esc(im[1].trim())}</span><span class="dict-related-ru">${esc(im[2].trim())}</span></div>`;
+      }).join('');
+      return `<div style="margin-top:8px"><div style="font-family:var(--font-ui);font-size:12px;font-weight:600;color:var(--text-3);margin-bottom:2px">${esc(label)}</div>${itemRows}</div>`;
     }).join('');
     extraHTML = `<div class="dict-related">
       <div class="dict-related-title">Синонимы и антонимы</div>
-      ${extraRows}
+      ${extraGroups}
     </div>`;
   }
 
