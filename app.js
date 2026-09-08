@@ -10063,7 +10063,11 @@ function renderDictResult(raw) {
   const text = String(raw || '').trim();
   if (!text) return '';
 
-  const parts = text.split(/^Возможные однокоренные слова:?$/im);
+  const extraMatch = text.match(/\n(Синонимы:[\s\S]*)$/i);
+  const withoutExtra = extraMatch ? text.slice(0, extraMatch.index).trim() : text;
+  const extraText = extraMatch ? extraMatch[1].trim() : '';
+
+  const parts = withoutExtra.split(/^Возможные однокоренные слова:?$/im);
   const mainText = parts[0].trim();
   const relatedText = (parts[1] || '').trim();
 
@@ -10099,7 +10103,20 @@ function renderDictResult(raw) {
     </div>`;
   }
 
-  return entriesHTML + relatedHTML;
+  let extraHTML = '';
+  if (extraText) {
+    const extraRows = extraText.split('\n').map(l => l.trim()).filter(Boolean).map(line => {
+      const m = line.match(/^([^:]+):\s*(.+)$/);
+      if (!m) return '';
+      return `<div class="dict-related-row"><span style="font-family:var(--font-ui);font-size:13px;color:var(--text-2);flex-shrink:0">${esc(m[1].trim())}</span><span class="dict-related-ru">${esc(m[2].trim())}</span></div>`;
+    }).join('');
+    extraHTML = `<div class="dict-related">
+      <div class="dict-related-title">Синонимы и антонимы</div>
+      ${extraRows}
+    </div>`;
+  }
+
+  return entriesHTML + relatedHTML + extraHTML;
 }
 
 async function callClaudeProxy(text, mode) {
