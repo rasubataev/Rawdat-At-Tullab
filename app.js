@@ -5064,7 +5064,7 @@ function runScreenRender(id) {
     case 's-home': renderHome(); break;
     case 's-translate': break;
     case 's-irab': break;
-    case 's-sarf': break;
+    case 's-sarf': renderSarfHistory(); break;
     case 's-practice': renderPractice(); break;
     case 's-learn': renderLearn(); break;
     case 's-books': renderBooks(); break;
@@ -5933,10 +5933,22 @@ case 'do-irab': {
 case 'do-sarf': {
   const text = $('#sarf-input').value.trim();
   if (!text) { toast('Введи текст'); break; }
+  addSarfHistory(text);
+  renderSarfHistory();
   setAiLoading('#sarf-result', 'Выполняю разбор…');
   analyzeSarf(text).then(res => {
     setAiDone('#sarf-result', res || 'Не удалось выполнить разбор');
   });
+  break;
+}
+case 'sarf-history-pick': {
+  $('#sarf-input').value = t.dataset.word;
+  break;
+}
+case 'clear-sarf-history': {
+  STATE.sarfHistory = [];
+  saveState();
+  renderSarfHistory();
   break;
 }
 case 'do-translate': {
@@ -10118,4 +10130,28 @@ async function analyzeIrab(text) {
 
 async function analyzeSarf(text) {
   return callClaudeProxy(text, 'sarf');
+}
+
+/* ===== SARF HISTORY ============================================= */
+function addSarfHistory(word) {
+  STATE.sarfHistory = (STATE.sarfHistory || []).filter(w => w !== word);
+  STATE.sarfHistory.unshift(word);
+  STATE.sarfHistory = STATE.sarfHistory.slice(0, 20);
+  saveState();
+}
+
+function renderSarfHistory() {
+  const box = $('#sarf-history');
+  if (!box) return;
+  const hist = STATE.sarfHistory || [];
+  if (!hist.length) { box.innerHTML = ''; return; }
+  box.innerHTML = `
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
+      <span class="muted" style="font-size:11.5px">Недавние запросы</span>
+      <button type="button" data-act="clear-sarf-history" style="font-size:11.5px;color:var(--text-3);background:none;border:none;padding:0">Очистить</button>
+    </div>
+    <div style="display:flex;flex-wrap:wrap;gap:8px" dir="rtl">
+      ${hist.map(w => `<button type="button" class="chip" data-act="sarf-history-pick" data-word="${esc(w)}">${esc(w)}</button>`).join('')}
+    </div>
+  `;
 }
