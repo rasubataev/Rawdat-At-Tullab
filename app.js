@@ -10063,67 +10063,69 @@ function renderDictResult(raw) {
   const text = String(raw || '').trim();
   if (!text) return '';
 
-  const extraMatch = text.match(/\n(Синонимы:[\s\S]*)$/i);
-  const withoutExtra = extraMatch ? text.slice(0, extraMatch.index).trim() : text;
-  const extraText = extraMatch ? extraMatch[1].trim() : '';
+  const FORM_LABELS = {
+    'ماضي': 'ماضي · прошедшее',
+    'مضارع': 'مضارع · настоящее',
+    'أمر': 'أمر · повелительное',
+    'مصدر': 'مصدر · масдар',
+    'اسم الفاعل': 'اسم الفاعل · действ. причастие',
+    'اسم المفعول': 'اسم المفعول · страд. причастие',
+  };
+  const WORD_PAIR_LABELS = { 'Предлоги': 'Употребляется с предлогами', 'Синонимы': 'Синонимы', 'Антонимы': 'Антонимы' };
 
-  const parts = withoutExtra.split(/^Возможные однокоренные слова:?$/im);
-  const mainText = parts[0].trim();
-  const relatedText = (parts[1] || '').trim();
+  const lines = text.split('\n').map(l => l.trim()).filter(Boolean);
+  const forms = [];
+  let meanings = '';
+  const wordPairBlocks = [];
 
-  const blocks = mainText.split(/\n[─═_\-]{3,}\n?/).map(b => b.trim()).filter(Boolean);
-  if (!blocks.length) return `<div class="dict-plain">${esc(text)}</div>`;
+  lines.forEach(line => {
+    const m = line.match(/^([^:]+):\s*(.+)$/);
+    if (!m) return;
+    const label = m[1].trim();
+    const value = m[2].trim();
+    if (FORM_LABELS[label]) {
+      forms.push({ label: FORM_LABELS[label], value });
+    } else if (label === 'Значения') {
+      meanings = value;
+    } else if (WORD_PAIR_LABELS[label]) {
+      wordPairBlocks.push({ title: WORD_PAIR_LABELS[label], value });
+    }
+  });
 
-  const entriesHTML = blocks.map(block => {
-    const lines = block.split('\n').map(l => l.trim()).filter(Boolean);
-    if (!lines.length) return '';
-    const headMatch = lines[0].match(/^(.+?)\s+[—-]\s+(.+)$/);
-    const word = headMatch ? headMatch[1].trim() : lines[0];
-    const tag = headMatch ? headMatch[2].trim() : '';
-    const ruLines = lines.slice(1).map(esc);
-    return `<div class="dict-entry">
+  if (!forms.length && !meanings && !wordPairBlocks.length) {
+    return `<div class="dict-plain">${esc(text)}</div>`;
+  }
+
+  let html = '';
+
+  forms.forEach(f => {
+    const parts = f.value.split(/\s+[—-]\s+/);
+    const word = (parts[0] || '').trim();
+    const tr = parts.slice(1).join(' — ').trim();
+    html += `<div class="dict-entry">
       <div class="dict-entry-head">
         <span class="dict-entry-word">${esc(word)}</span>
-        ${tag ? `<span class="dict-entry-tag">${esc(tag)}</span>` : ''}
+        <span class="dict-entry-tag">${esc(f.label)}</span>
       </div>
-      ${ruLines.length ? `<div class="dict-entry-ru">${ruLines.join('<br>')}</div>` : ''}
+      ${tr ? `<div class="dict-entry-ru">${esc(tr)}</div>` : ''}
     </div>`;
-  }).join('');
+  });
 
-  let relatedHTML = '';
-  if (relatedText) {
-    const relRows = relatedText.split('\n').map(l => l.trim()).filter(Boolean).map(line => {
-      const m = line.match(/^(.+?)\s+[—-]\s+(.+)$/);
-      if (!m) return `<div class="dict-related-row"><span class="dict-related-word">${esc(line)}</span></div>`;
-      return `<div class="dict-related-row"><span class="dict-related-word">${esc(m[1].trim())}</span><span class="dict-related-ru">${esc(m[2].trim())}</span></div>`;
-    }).join('');
-    relatedHTML = `<div class="dict-related">
-      <div class="dict-related-title">Возможные однокоренные слова</div>
-      ${relRows}
-    </div>`;
+  if (meanings) {
+    html += `<div class="dict-related"><div class="dict-related-title">Значения</div><div class="dict-related-ru" style="line-height:1.6">${esc(meanings)}</div></div>`;
   }
 
-  let extraHTML = '';
-  if (extraText) {
-    const extraGroups = extraText.split('\n').map(l => l.trim()).filter(Boolean).map(line => {
-      const m = line.match(/^([^:]+):\s*(.+)$/);
-      if (!m) return '';
-      const label = m[1].trim();
-      const items = m[2].split(';').map(x => x.trim()).filter(Boolean);
-      const itemRows = items.map(item => {
-        const im = item.match(/^(.+?)\s+[—-]\s+(.+)$/);
-        if (!im) return `<div class="dict-related-row"><span class="dict-related-word">${esc(item)}</span></div>`;
-        return `<div class="dict-related-row"><span class="dict-related-word">${esc(im[1].trim())}</span><span class="dict-related-ru">${esc(im[2].trim())}</span></div>`;
-      }).join('');
-      return `<div style="margin-top:8px"><div style="font-family:var(--font-ui);font-size:12px;font-weight:600;color:var(--text-3);margin-bottom:2px">${esc(label)}</div>${itemRows}</div>`;
+  wordPairBlocks.forEach(b => {
+    const items = b.value.split(';').map(x => x.trim()).filter(Boolean);
+    const rows = items.map(item => {
+      const im = item.match(/^(.+?)\s+[—-]\s+(.+)$/);
+      if (!im) return `<div class="dict-related-row"><span class="dict-related-word">${esc(item)}</span></div>`;
+      return `<div class="dict-related-row"><span class="dict-related-word">${esc(im[1].trim())}</span><span class="dict-related-ru">${esc(im[2].trim())}</span></div>`;
     }).join('');
-    extraHTML = `<div class="dict-related">
-      <div class="dict-related-title">Синонимы и антонимы</div>
-      ${extraGroups}
-    </div>`;
-  }
+    html += `<div class="dict-related"><div class="dict-related-title">${esc(b.title)}</div>${rows}</div>`;
+  });
 
-  return entriesHTML + relatedHTML + extraHTML;
+  return html;
 }
 
 async function callClaudeProxy(text, mode) {
