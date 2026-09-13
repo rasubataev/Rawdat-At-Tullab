@@ -5568,6 +5568,7 @@ function renderDecks() {
 }
 
 let DECK_ID = null;
+let PENDING_IMPORT_DECK = null;
 function openDeck(id) {
   if (!STATE.decks[id]) return;
   DECK_ID = id; navigate('s-deck');
@@ -5829,8 +5830,38 @@ function sheetEditDeck(id) {
       <button type="button" class="btn btn-primary" data-act="save-deck-name" data-id="${d.id}">Сохранить</button>
     </div>
     <div style="height:10px"></div>
+    <button type="button" class="btn btn-secondary" data-act="share-deck" data-id="${d.id}">Поделиться колодой</button>
+    <div style="height:10px"></div>
     <button type="button" class="btn btn-danger" data-act="delete-deck" data-id="${d.id}">Удалить колоду</button>
   `);
+}
+
+// Отдаёт колоду на сервер, получает короткий код и показывает ссылку вида
+// ?deck=CODE — по ней другой человек получает предложение добавить себе
+// копию этой колоды (без личного прогресса).
+async function shareDeck(id) {
+  const d = STATE.decks[id]; if (!d) return;
+  if (!d.words.length) { toast('Колода пуста'); return; }
+  toast('Готовлю ссылку…');
+  try {
+    const res = await fetch(`${TRANSLATE_PROXY_URL}/deck/share`, {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ name: d.name, words: d.words }),
+    });
+    const data = await res.json();
+    if (!res.ok || !data.code) { toast('Не удалось поделиться'); return; }
+    const link = `${location.origin}${location.pathname}?deck=${data.code}`;
+    openSheet('Поделиться колодой', `
+      <div class="field"><label>Ссылка на копию</label><input class="input" id="share-link" value="${esc(link)}" readonly></div>
+      <div class="btn-row" style="margin-top:8px">
+        <button type="button" class="btn btn-secondary" data-act="close-sheet">Готово</button>
+        <button type="button" class="btn btn-primary" data-act="copy-share-link" data-link="${esc(link)}">Скопировать</button>
+      </div>
+    `, body => body.querySelector('#share-link').select());
+  } catch {
+    toast('Не удалось поделиться');
+  }
 }
 
 function sheetAddWord(deckId) {
@@ -6005,6 +6036,26 @@ case 'pr-reset': {
     case 'delete-deck': {
       if (!confirm('Удалить колоду?')) break;
       delete STATE.decks[t.dataset.id]; saveState(); closeSheet(); DECK_ID = null; navigate('s-decks', { stack: false }); toast('Удалено'); break;
+    }
+    case 'share-deck': shareDeck(t.dataset.id); break;
+    case 'copy-share-link': {
+      const link = t.dataset.link;
+      if (navigator.clipboard?.writeText) {
+        navigator.clipboard.writeText(link).then(() => toast('Скопировано')).catch(() => toast('Не удалось скопировать'));
+      } else {
+        toast('Не удалось скопировать');
+      }
+      break;
+    }
+    case 'confirm-import-deck': {
+      const deck = PENDING_IMPORT_DECK;
+      if (!deck) { closeSheet(); break; }
+      const id = 'd_' + Math.random().toString(36).slice(2, 9);
+      STATE.decks[id] = { id, name: deck.name, createdAt: now(), words: deck.words.map(w => ({ ar: w.ar, ru: w.ru || '' })) };
+      deck.words.forEach(w => ensureCard(w.ar, w.ru || ''));
+      PENDING_IMPORT_DECK = null;
+      saveState(); closeSheet(); navigate('s-decks', { stack: false }); renderDecks(); toast('Колода добавлена');
+      break;
     }
     case 'save-word': {
       const deckId = t.dataset.deck; const d = STATE.decks[deckId]; if (!d) break;
@@ -10035,6 +10086,35 @@ let FEATURE_FLAGS = {};
       }
     })
     .catch(() => {});
+})();
+
+// Импорт «поделенной» колоды по ссылке вида ?deck=CODE: спрашиваем
+// подтверждение и, если да, копируем колоду (без прогресса того, кто
+// поделился) в свой список колод.
+(function checkDeckImport() {
+  const code = new URLSearchParams(location.search).get('deck');
+  if (!code) return;
+
+  const cleanUrl = new URL(location.href);
+  cleanUrl.searchParams.delete('deck');
+  history.replaceState({}, '', cleanUrl);
+
+  fetch(`${TRANSLATE_PROXY_URL}/deck/get?code=${encodeURIComponent(code)}`)
+    .then(r => r.json())
+    .then(deck => {
+      if (!deck || !deck.name || !Array.isArray(deck.words) || !deck.words.length) {
+        toast('Колода не найдена'); return;
+      }
+      PENDING_IMPORT_DECK = deck;
+      openSheet('Импортировать колоду', `
+        <p style="margin:0 0 14px;color:var(--text-2)">«${esc(deck.name)}» — ${deck.words.length} слов. Добавить как новую колоду?</p>
+        <div class="btn-row">
+          <button type="button" class="btn btn-secondary" data-act="close-sheet">Отмена</button>
+          <button type="button" class="btn btn-primary" data-act="confirm-import-deck">Добавить</button>
+        </div>
+      `);
+    })
+    .catch(() => toast('Колода не найдена'));
 })();
 
 function setAiLoading(sel, text) {
