@@ -5569,6 +5569,63 @@ function renderDecks() {
 
 let DECK_ID = null;
 let PENDING_IMPORT_DECK = null;
+let PENDING_RESTORE_DATA = null;
+
+/* ===== РЕЗЕРВНАЯ КОПИЯ (по коду, без аккаунта) =================== */
+const BACKUP_CODE_KEY = 'dhp_backup_code';
+function getBackupCode() {
+  try { return localStorage.getItem(BACKUP_CODE_KEY) || ''; } catch { return ''; }
+}
+function setBackupCode(code) {
+  try { localStorage.setItem(BACKUP_CODE_KEY, code); } catch {}
+}
+
+async function backupSave() {
+  toast('Сохраняю копию…');
+  try {
+    const res = await fetch(`${TRANSLATE_PROXY_URL}/backup/save`, {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ code: getBackupCode(), data: STATE }),
+    });
+    const data = await res.json();
+    if (!res.ok || !data.code) { toast('Не удалось сохранить'); return; }
+    setBackupCode(data.code);
+    renderSettings();
+    openSheet('Резервная копия сохранена', `
+      <p style="margin:0 0 14px;color:var(--text-2)">Запиши или сохрани этот код — он понадобится, чтобы восстановить прогресс на другом устройстве:</p>
+      <div class="field"><input class="input" id="backup-code-display" value="${esc(data.code)}" readonly></div>
+      <div class="btn-row" style="margin-top:12px">
+        <button type="button" class="btn btn-secondary" data-act="close-sheet">Готово</button>
+        <button type="button" class="btn btn-primary" data-act="copy-share-link" data-link="${esc(data.code)}">Скопировать</button>
+      </div>
+    `, body => body.querySelector('#backup-code-display').select());
+  } catch {
+    toast('Не удалось сохранить');
+  }
+}
+
+async function backupRestore() {
+  const code = $('#backup-restore-code')?.value?.trim().toLowerCase();
+  if (!code) { toast('Введи код'); return; }
+  toast('Загружаю копию…');
+  try {
+    const res = await fetch(`${TRANSLATE_PROXY_URL}/backup/get?code=${encodeURIComponent(code)}`);
+    const data = await res.json();
+    if (!res.ok || !data.data) { toast('Копия не найдена'); return; }
+    PENDING_RESTORE_DATA = data.data;
+    const updated = data.updatedAt ? new Date(data.updatedAt).toLocaleString('ru-RU') : '—';
+    openSheet('Восстановить прогресс', `
+      <p style="margin:0 0 14px;color:var(--text-2)">Резервная копия от ${esc(updated)}. Заменить текущий прогресс на этом устройстве? Текущие данные, если они не сохранены отдельно, будут потеряны.</p>
+      <div class="btn-row">
+        <button type="button" class="btn btn-secondary" data-act="close-sheet">Отмена</button>
+        <button type="button" class="btn btn-primary" data-act="confirm-backup-restore" data-code="${esc(code)}">Восстановить</button>
+      </div>
+    `);
+  } catch {
+    toast('Копия не найдена');
+  }
+}
 function openDeck(id) {
   if (!STATE.decks[id]) return;
   DECK_ID = id; navigate('s-deck');
@@ -5742,6 +5799,14 @@ function renderSettings() {
   const notifOn = !!STATE.settings?.notifications;
   $('#notif-toggle').classList.toggle('on', notifOn);
   $('#notif-label').textContent = notifOn ? 'Включены' : 'Выключены';
+
+  const code = getBackupCode();
+  const statusEl = $('#backup-status');
+  if (statusEl) {
+    statusEl.textContent = code
+      ? `Копия сохранена под кодом «${code}». Обнови её после важных изменений.`
+      : 'Сохрани прогресс и колоды в облако по коду, чтобы не потерять их при смене телефона или очистке кеша.';
+  }
 }
 
 /* ===== THEME ==================================================== */
@@ -6126,6 +6191,20 @@ case 'pr-reset': {
       saveState(); closeSheet(); renderDeck(); toast('Сохранено'); break;
     }
     case 'merge-decks': sheetMergeDecks(); break;
+    case 'backup-save': backupSave(); break;
+    case 'backup-restore': backupRestore(); break;
+    case 'confirm-backup-restore': {
+      if (!PENDING_RESTORE_DATA) { closeSheet(); break; }
+      STATE = PENDING_RESTORE_DATA;
+      setBackupCode(t.dataset.code);
+      saveState();
+      PENDING_RESTORE_DATA = null;
+      closeSheet();
+      applyTheme(STATE.settings?.theme || 'light');
+      navigate('s-home', { stack: false }); renderHome();
+      toast('Прогресс восстановлен');
+      break;
+    }
     case 'toggle-merge-deck': {
       const id = t.dataset.id;
       if (MERGE_SEL[id]) delete MERGE_SEL[id]; else MERGE_SEL[id] = true;
