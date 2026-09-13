@@ -5234,6 +5234,19 @@
   white-space: pre-wrap;
 }
 
+.dict-example-ar {
+  font-family: var(--font-ar-classic);
+  font-size: 16px;
+  line-height: 1.6;
+  color: var(--text);
+}
+.dict-example-ru {
+  margin-top: 4px;
+  font-family: var(--font-ui);
+  font-size: 13.5px;
+  color: var(--text-3);
+}
+
 /* ============================================================
    SOCIAL BUTTONS (экран «Полезные ссылки»)
    ============================================================ */

@@ -10212,77 +10212,111 @@ function setAiDoneHTML(sel, html) {
   el.classList.remove('is-loading');
 }
 
-// Разбирает ответ словаря (формат "слово — помета\nперевод", записи через
-// строку из ─/═/-, в конце опционально "Возможные однокоренные слова:")
-// в вёрстку карточек. Если текст не похож на этот формат — просто
-// показывает его как есть.
+// Разбирает ответ словаря в новом формате (без меток у форм):
+//   форма — перевод
+//   форма — перевод
+//   ...
+//   Употребляется с предлогом: / نحو: (пример + перевод)
+//   Синонимы: / Антонимы: (каждый "форма — перевод" или "ماضي — مضارع — перевод")
+// Если текст не похож на этот формат — просто показывает его как есть.
+function parseDictWordLine(line) {
+  const parts = line.split(/\s+—\s+/);
+  if (parts.length >= 3) {
+    return { word: `${parts[0]} — ${parts[1]}`, tr: parts.slice(2).join(' — ') };
+  }
+  if (parts.length === 2) {
+    return { word: parts[0], tr: parts[1] };
+  }
+  return { word: line, tr: '' };
+}
+
 function renderDictResult(raw) {
   const text = String(raw || '').trim();
   if (!text) return '';
 
-  const FORM_LABELS = {
-    'ماضي': 'ماضي · прошедшее',
-    'مضارع': 'مضارع · настоящее',
-    'أمر': 'أمر · повелительное',
-    'مصدر': 'مصدر · масдар',
-    'اسم الفاعل': 'اسم الفاعل · действ. причастие',
-    'اسم المفعول': 'اسم المفعول · страд. причастие',
-    'مفرد': 'مفرد · ед. число',
-    'جمع': 'جمع · мн. число',
-  };
-  const WORD_PAIR_LABELS = { 'Предлоги': 'Употребляется с предлогами', 'Синонимы': 'Синонимы', 'Антонимы': 'Антонимы' };
+  const lines = text.split('\n').map(l => l.trim());
+  const HEADERS = ['Употребляется с предлогом:', 'نحو:', 'Синонимы:', 'Антонимы:'];
 
-  const lines = text.split('\n').map(l => l.trim()).filter(Boolean);
   const forms = [];
-  let meanings = '';
-  const wordPairBlocks = [];
+  const preps = [];
+  let example = null;
+  const synonyms = [];
+  const antonyms = [];
 
-  lines.forEach(line => {
-    const m = line.match(/^([^:]+):\s*(.+)$/);
-    if (!m) return;
-    const label = m[1].trim();
-    const value = m[2].trim();
-    if (FORM_LABELS[label]) {
-      forms.push({ label: FORM_LABELS[label], value });
-    } else if (label === 'Значения') {
-      meanings = value;
-    } else if (WORD_PAIR_LABELS[label]) {
-      wordPairBlocks.push({ title: WORD_PAIR_LABELS[label], value });
+  const n = lines.length;
+  let i = 0;
+
+  while (i < n) {
+    const line = lines[i];
+    if (!line) { i++; continue; }
+    if (HEADERS.includes(line)) break;
+    const m = line.match(/^(.+?)\s+—\s+(.+)$/);
+    if (m) forms.push({ word: m[1].trim(), tr: m[2].trim() });
+    i++;
+  }
+
+  while (i < n) {
+    const line = lines[i];
+    if (!line) { i++; continue; }
+
+    if (line === 'Употребляется с предлогом:') {
+      i++;
+      while (i < n && lines[i] && !HEADERS.includes(lines[i])) { preps.push(lines[i]); i++; }
+      continue;
     }
-  });
+    if (line === 'نحو:') {
+      i++;
+      const ar = lines[i] || ''; i++;
+      const ru = lines[i] || ''; i++;
+      if (ar) example = { ar, ru };
+      continue;
+    }
+    if (line === 'Синонимы:' || line === 'Антонимы:') {
+      const bucket = line === 'Синонимы:' ? synonyms : antonyms;
+      i++;
+      while (i < n && lines[i] && !HEADERS.includes(lines[i])) { bucket.push(lines[i]); i++; }
+      continue;
+    }
+    i++;
+  }
 
-  if (!forms.length && !meanings && !wordPairBlocks.length) {
+  if (!forms.length) {
     return `<div class="dict-plain">${esc(text)}</div>`;
   }
 
   let html = '';
 
   forms.forEach(f => {
-    const parts = f.value.split(/\s+[—-]\s+/);
-    const word = (parts[0] || '').trim();
-    const tr = parts.slice(1).join(' — ').trim();
     html += `<div class="dict-entry">
       <div class="dict-entry-head">
-        <span class="dict-entry-word">${esc(word)}</span>
-        <span class="dict-entry-tag">${esc(f.label)}</span>
+        <span class="dict-entry-word">${esc(f.word)}</span>
       </div>
-      ${tr ? `<div class="dict-entry-ru">${esc(tr)}</div>` : ''}
+      ${f.tr ? `<div class="dict-entry-ru">${esc(f.tr)}</div>` : ''}
     </div>`;
   });
 
-  if (meanings) {
-    html += `<div class="dict-related"><div class="dict-related-title">Значения</div><div class="dict-related-ru" style="line-height:1.6">${esc(meanings)}</div></div>`;
+  if (preps.length) {
+    const rows = preps.map(p => `<div class="dict-related-row"><span class="dict-related-word">${esc(p)}</span></div>`).join('');
+    html += `<div class="dict-related"><div class="dict-related-title">Употребляется с предлогом</div>${rows}</div>`;
   }
 
-  wordPairBlocks.forEach(b => {
-    const items = b.value.split(';').map(x => x.trim()).filter(Boolean);
-    const rows = items.map(item => {
-      const im = item.match(/^(.+?)\s+[—-]\s+(.+)$/);
-      if (!im) return `<div class="dict-related-row"><span class="dict-related-word">${esc(item)}</span></div>`;
-      return `<div class="dict-related-row"><span class="dict-related-word">${esc(im[1].trim())}</span><span class="dict-related-ru">${esc(im[2].trim())}</span></div>`;
-    }).join('');
-    html += `<div class="dict-related"><div class="dict-related-title">${esc(b.title)}</div>${rows}</div>`;
-  });
+  if (example) {
+    html += `<div class="dict-related">
+      <div class="dict-related-title">Пример</div>
+      <div class="dict-example-ar">${esc(example.ar)}</div>
+      ${example.ru ? `<div class="dict-example-ru">${esc(example.ru)}</div>` : ''}
+    </div>`;
+  }
+
+  if (synonyms.length) {
+    const rows = synonyms.map(l => { const p = parseDictWordLine(l); return `<div class="dict-related-row"><span class="dict-related-word">${esc(p.word)}</span><span class="dict-related-ru">${esc(p.tr)}</span></div>`; }).join('');
+    html += `<div class="dict-related"><div class="dict-related-title">Синонимы</div>${rows}</div>`;
+  }
+
+  if (antonyms.length) {
+    const rows = antonyms.map(l => { const p = parseDictWordLine(l); return `<div class="dict-related-row"><span class="dict-related-word">${esc(p.word)}</span><span class="dict-related-ru">${esc(p.tr)}</span></div>`; }).join('');
+    html += `<div class="dict-related"><div class="dict-related-title">Антонимы</div>${rows}</div>`;
+  }
 
   return html;
 }
