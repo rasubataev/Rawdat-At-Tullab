@@ -1135,6 +1135,7 @@
    ============================================================ */
   .word-row {
     display: flex;
+    flex-wrap: wrap;
     align-items: center;
     gap: 10px;
     padding: 12px 16px;
@@ -1204,6 +1205,16 @@
 
   .word-row .wr-fav.on svg {
     fill: currentColor;
+  }
+
+  .word-row .wr-extra {
+    flex-basis: 100%;
+    order: 5;
+    font-size: 12px;
+    line-height: 1.5;
+    color: var(--text-3);
+    padding-left: 44px;
+    white-space: normal;
   }
 
   /* ============================================================
@@ -3577,6 +3588,7 @@
    ============================================================ */
   .word-row {
     display: flex;
+    flex-wrap: wrap;
     align-items: center;
     gap: 10px;
     padding: 12px 16px;
@@ -3646,6 +3658,16 @@
 
   .word-row .wr-fav.on svg {
     fill: currentColor;
+  }
+
+  .word-row .wr-extra {
+    flex-basis: 100%;
+    order: 5;
+    font-size: 12px;
+    line-height: 1.5;
+    color: var(--text-3);
+    padding-left: 44px;
+    white-space: normal;
   }
 
   /* ============================================================

@@ -5591,6 +5591,11 @@ function renderDeck() {
   list.innerHTML = `<div class="words-group">${d.words.map((w, i) => {
     const c = STATE.cards[keyOf(w.ar)];
     const fav = c && c.flags.fav;
+    const extraParts = [];
+    if (w.syn) extraParts.push(`مرادف: ${esc(w.syn)}`);
+    if (w.ant) extraParts.push(`عكس: ${esc(w.ant)}`);
+    if (w.prep) extraParts.push(`с предлогом: ${esc(w.prep)}`);
+    const extra = extraParts.length ? `<div class="wr-extra">${extraParts.join(' · ')}</div>` : '';
     return `
       <div class="word-row">
         <button type="button" class="wr-fav ${fav ? 'on' : ''}" data-act="toggle-fav" data-ar="${esc(w.ar)}" aria-label="Избранное">
@@ -5601,6 +5606,7 @@ function renderDeck() {
         <button type="button" class="icon-btn" data-act="edit-deck-word" data-idx="${i}" aria-label="Редактировать" style="width:32px;height:32px;background:none">
           <svg viewBox="0 0 24 24"><path d="M4 20h4L20 8l-4-4L4 16z"/></svg>
         </button>
+        ${extra}
       </div>
     `;
   }).join('')}</div>`;
@@ -5869,6 +5875,11 @@ function sheetAddWord(deckId) {
   openSheet('Добавить слово', `
     <div class="field"><label>Арабское</label><input class="input ar" id="aw-ar" placeholder="قَلَمٌ" autocomplete="off"></div>
     <div class="field"><label>Перевод</label><input class="input" id="aw-ru" placeholder="Ручка" autocomplete="off"></div>
+    <details style="margin:4px 0 12px"><summary class="muted" style="cursor:pointer;padding:4px">Доп. поля (مرادف, عكس, предлог)</summary>
+      <div class="field" style="margin-top:10px"><label>Синоним (مرادف)</label><input class="input ar" id="aw-syn" autocomplete="off"></div>
+      <div class="field"><label>Антоним (عكس)</label><input class="input ar" id="aw-ant" autocomplete="off"></div>
+      <div class="field"><label>Употребляется с предлогом</label><input class="input" id="aw-prep" placeholder="Например: بـ — ..." autocomplete="off"></div>
+    </details>
     <details style="margin:4px 0 12px"><summary class="muted" style="cursor:pointer;padding:4px">Массовое добавление (ar ; ru)</summary>
       <textarea class="textarea" id="aw-bulk" placeholder="قَلَمٌ ; Ручка&#10;كِتَابٌ ; Книга" style="margin-top:8px"></textarea>
     </details>
@@ -5884,11 +5895,45 @@ function sheetEditWord(deckId, idx) {
   openSheet('Редактировать', `
     <div class="field"><label>Арабское</label><input class="input ar" id="ew-ar" value="${esc(w.ar)}"></div>
     <div class="field"><label>Перевод</label><input class="input" id="ew-ru" value="${esc(w.ru||'')}"></div>
+    <div class="field"><label>Синоним (مرادف)</label><input class="input ar" id="ew-syn" value="${esc(w.syn||'')}"></div>
+    <div class="field"><label>Антоним (عكس)</label><input class="input ar" id="ew-ant" value="${esc(w.ant||'')}"></div>
+    <div class="field"><label>Употребляется с предлогом</label><input class="input" id="ew-prep" value="${esc(w.prep||'')}"></div>
     <div class="btn-row" style="margin-top:8px">
       <button type="button" class="btn btn-danger" data-act="delete-word" data-deck="${deckId}" data-idx="${idx}">Удалить</button>
       <button type="button" class="btn btn-primary" data-act="update-word" data-deck="${deckId}" data-idx="${idx}">Сохранить</button>
     </div>
   `);
+}
+
+let MERGE_SEL = {};
+function sheetMergeDecks() {
+  const ids = Object.keys(STATE.decks);
+  if (ids.length < 2) { toast('Нужно минимум 2 колоды'); return; }
+  MERGE_SEL = {};
+  openSheet('Объединить колоды', `
+    <div class="field"><label>Название новой колоды</label><input class="input" id="merge-deck-name" placeholder="Например: Все слова" maxlength="60" autocomplete="off"></div>
+    <div class="muted" style="padding:4px 4px 8px">Выбери колоды для объединения:</div>
+    <div id="merge-deck-list"></div>
+    <div class="btn-row" style="margin-top:12px">
+      <button type="button" class="btn btn-secondary" data-act="close-sheet">Отмена</button>
+      <button type="button" class="btn btn-primary" data-act="confirm-merge-decks">Объединить</button>
+    </div>
+  `, () => renderMergeDeckList());
+}
+
+function renderMergeDeckList() {
+  const box = $('#merge-deck-list'); if (!box) return;
+  box.innerHTML = Object.keys(STATE.decks).map(id => {
+    const d = STATE.decks[id]; const on = !!MERGE_SEL[id];
+    return `
+      <button type="button" class="list-item" data-act="toggle-merge-deck" data-id="${id}" style="cursor:pointer">
+        <div class="li-icon" style="background:${on ? 'var(--brand-100)' : 'var(--surface-2)'};color:${on ? 'var(--brand-600)' : 'var(--text-3)'};">
+          <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" fill="${on ? 'currentColor' : 'none'}" stroke-width="2"><path d="M5 12l5 5 9-10"/></svg>
+        </div>
+        <div class="li-body"><div class="li-title">${esc(d.name)}</div><div class="li-sub">${d.words.length} слов</div></div>
+      </button>
+    `;
+  }).join('');
 }
 
 function resetData() {
@@ -6051,7 +6096,7 @@ case 'pr-reset': {
       const deck = PENDING_IMPORT_DECK;
       if (!deck) { closeSheet(); break; }
       const id = 'd_' + Math.random().toString(36).slice(2, 9);
-      STATE.decks[id] = { id, name: deck.name, createdAt: now(), words: deck.words.map(w => ({ ar: w.ar, ru: w.ru || '' })) };
+      STATE.decks[id] = { id, name: deck.name, createdAt: now(), words: deck.words.map(w => ({ ar: w.ar, ru: w.ru || '', syn: w.syn || '', ant: w.ant || '', prep: w.prep || '' })) };
       deck.words.forEach(w => ensureCard(w.ar, w.ru || ''));
       PENDING_IMPORT_DECK = null;
       saveState(); closeSheet(); navigate('s-decks', { stack: false }); renderDecks(); toast('Колода добавлена');
@@ -6060,9 +6105,12 @@ case 'pr-reset': {
     case 'save-word': {
       const deckId = t.dataset.deck; const d = STATE.decks[deckId]; if (!d) break;
       const ar = $('#aw-ar')?.value?.trim(), ru = $('#aw-ru')?.value?.trim();
+      const syn = $('#aw-syn')?.value?.trim() || '';
+      const ant = $('#aw-ant')?.value?.trim() || '';
+      const prep = $('#aw-prep')?.value?.trim() || '';
       const bulk = $('#aw-bulk')?.value?.trim() || '';
       let added = 0;
-      if (ar) { d.words.push({ ar, ru: ru || '' }); ensureCard(ar, ru || ''); added++; }
+      if (ar) { d.words.push({ ar, ru: ru || '', syn, ant, prep }); ensureCard(ar, ru || ''); added++; }
       bulk.split('\n').forEach(ln => { const [a, r] = ln.split(';').map(s => s.trim()); if (a) { d.words.push({ ar: a, ru: r || '' }); ensureCard(a, r || ''); added++; } });
       if (!added) { toast('Пусто'); break; }
       saveState(); closeSheet(); renderDeck(); toast(`Добавлено: ${added}`); break;
@@ -6070,9 +6118,38 @@ case 'pr-reset': {
     case 'update-word': {
       const d = STATE.decks[t.dataset.deck]; const idx = parseInt(t.dataset.idx, 10);
       const ar = $('#ew-ar')?.value?.trim(), ru = $('#ew-ru')?.value?.trim();
+      const syn = $('#ew-syn')?.value?.trim() || '';
+      const ant = $('#ew-ant')?.value?.trim() || '';
+      const prep = $('#ew-prep')?.value?.trim() || '';
       if (!ar || !d) { toast('Пусто'); break; }
-      d.words[idx] = { ar, ru: ru || '' }; ensureCard(ar, ru || '');
+      d.words[idx] = { ar, ru: ru || '', syn, ant, prep }; ensureCard(ar, ru || '');
       saveState(); closeSheet(); renderDeck(); toast('Сохранено'); break;
+    }
+    case 'merge-decks': sheetMergeDecks(); break;
+    case 'toggle-merge-deck': {
+      const id = t.dataset.id;
+      if (MERGE_SEL[id]) delete MERGE_SEL[id]; else MERGE_SEL[id] = true;
+      renderMergeDeckList(); break;
+    }
+    case 'confirm-merge-decks': {
+      const name = $('#merge-deck-name')?.value?.trim();
+      const selected = Object.keys(MERGE_SEL);
+      if (!name) { toast('Введи название'); break; }
+      if (selected.length < 2) { toast('Выбери минимум 2 колоды'); break; }
+      const seen = new Set(); const words = [];
+      selected.forEach(id => {
+        const d = STATE.decks[id]; if (!d) return;
+        d.words.forEach(w => {
+          if (seen.has(w.ar)) return;
+          seen.add(w.ar);
+          words.push({ ar: w.ar, ru: w.ru || '', syn: w.syn || '', ant: w.ant || '', prep: w.prep || '' });
+        });
+      });
+      if (!words.length) { toast('Пусто'); break; }
+      const id = 'd_' + Math.random().toString(36).slice(2, 9);
+      STATE.decks[id] = { id, name, createdAt: now(), words };
+      saveState(); closeSheet(); renderDecks(); toast(`Создана колода из ${words.length} слов`);
+      break;
     }
     case 'delete-word': {
       const d = STATE.decks[t.dataset.deck]; const idx = parseInt(t.dataset.idx, 10);
