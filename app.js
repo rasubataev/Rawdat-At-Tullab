@@ -5945,19 +5945,79 @@ function sheetAddWord(deckId) {
   openSheet('Добавить слово', `
     <div class="field"><label>Арабское</label><input class="input ar" id="aw-ar" placeholder="قَلَمٌ" autocomplete="off"></div>
     <div class="field"><label>Перевод</label><input class="input" id="aw-ru" placeholder="Ручка" autocomplete="off"></div>
+    <button type="button" class="btn btn-secondary" style="width:100%;margin:4px 0 12px" data-act="add-words-photo" data-deck="${d.id}">
+      <svg viewBox="0 0 24 24" style="width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;margin-right:6px"><path d="M4 7h3l2-2h6l2 2h3a1 1 0 0 1 1 1v11a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V8a1 1 0 0 1 1-1z"/><circle cx="12" cy="13" r="4"/></svg>
+      Добавить по фото
+    </button>
+    <input type="file" id="aw-photo-input" accept="image/*" capture="environment" style="display:none">
     <details style="margin:4px 0 12px"><summary class="muted" style="cursor:pointer;padding:4px">Доп. поля (مرادف, عكس, предлог)</summary>
       <div class="field" style="margin-top:10px"><label>Синоним (مرادف)</label><input class="input ar" id="aw-syn" autocomplete="off"></div>
       <div class="field"><label>Антоним (عكس)</label><input class="input ar" id="aw-ant" autocomplete="off"></div>
       <div class="field"><label>Употребляется с предлогом</label><input class="input" id="aw-prep" placeholder="Например: بـ — ..." autocomplete="off"></div>
     </details>
-    <details style="margin:4px 0 12px"><summary class="muted" style="cursor:pointer;padding:4px">Массовое добавление (ar ; ru)</summary>
+    <details id="aw-bulk-details" style="margin:4px 0 12px"><summary class="muted" style="cursor:pointer;padding:4px">Массовое добавление (ar ; ru)</summary>
       <textarea class="textarea" id="aw-bulk" placeholder="قَلَمٌ ; Ручка&#10;كِتَابٌ ; Книга" style="margin-top:8px"></textarea>
     </details>
     <div class="btn-row">
       <button type="button" class="btn btn-secondary" data-act="close-sheet">Отмена</button>
       <button type="button" class="btn btn-primary" data-act="save-word" data-deck="${d.id}">Сохранить</button>
     </div>
-  `, body => body.querySelector('#aw-ar').focus());
+  `, body => {
+    body.querySelector('#aw-ar').focus();
+    body.querySelector('#aw-photo-input').addEventListener('change', handleAddWordsPhoto);
+  });
+}
+
+// Уменьшает фото до разумного размера перед отправкой на сервер — иначе
+// снимок с телефона весит несколько МБ и долго/дорого гонять его в OpenAI.
+function downscaleImageToDataUrl(file, maxDim = 1600, quality = 0.82) {
+  return new Promise((resolve, reject) => {
+    const url = URL.createObjectURL(file);
+    const img = new Image();
+    img.onload = () => {
+      let { width, height } = img;
+      if (width > maxDim || height > maxDim) {
+        const scale = maxDim / Math.max(width, height);
+        width = Math.round(width * scale);
+        height = Math.round(height * scale);
+      }
+      const canvas = document.createElement('canvas');
+      canvas.width = width; canvas.height = height;
+      canvas.getContext('2d').drawImage(img, 0, 0, width, height);
+      URL.revokeObjectURL(url);
+      resolve(canvas.toDataURL('image/jpeg', quality));
+    };
+    img.onerror = () => { URL.revokeObjectURL(url); reject(new Error('image load failed')); };
+    img.src = url;
+  });
+}
+
+async function handleAddWordsPhoto(e) {
+  const file = e.target.files && e.target.files[0];
+  e.target.value = '';
+  if (!file) return;
+  toast('Распознаю фото…');
+  try {
+    const dataUrl = await downscaleImageToDataUrl(file);
+    const res = await fetch(`${TRANSLATE_PROXY_URL}/ocr`, {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ image: dataUrl }),
+    });
+    const data = await res.json();
+    if (data.error) { toast(data.error.message || 'Не удалось распознать'); return; }
+    const text = data.content?.find(b => b.type === 'text')?.text?.trim();
+    if (!text) { toast('Слов на фото не найдено'); return; }
+    const bulk = $('#aw-bulk');
+    if (bulk) {
+      bulk.value = bulk.value.trim() ? bulk.value.trim() + '\n' + text : text;
+      const details = $('#aw-bulk-details');
+      if (details) details.open = true;
+    }
+    toast('Распознано — проверь список и сохрани');
+  } catch {
+    toast('Не удалось распознать фото');
+  }
 }
 
 function sheetEditWord(deckId, idx) {
@@ -6135,6 +6195,7 @@ case 'pr-reset': {
     case 'new-deck': sheetNewDeck(); break;
     case 'deck-menu': sheetEditDeck(DECK_ID); break;
     case 'deck-add-word': sheetAddWord(DECK_ID); break;
+    case 'add-words-photo': $('#aw-photo-input')?.click(); break;
     case 'edit-deck-word': sheetEditWord(DECK_ID, parseInt(t.dataset.idx, 10)); break;
     case 'save-new-deck': {
       const v = $('#nd-name')?.value?.trim();
