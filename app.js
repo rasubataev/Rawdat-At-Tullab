@@ -4912,7 +4912,7 @@ function startDue() {
   if (!due.length) { toast('Нет слов к повторению'); return; }
   startSession({ type: 'due', title: 'Повторение', words: due, backScreen: 's-learn' });
 }
-const Q_STEPS = { hard: 6, ok: 14, easy: 40 };
+const Q_STEPS = { hard: 6, ok: 14 };
 function reinsert(cardId, kind) {
   // Карточку нельзя задвигать глубже, чем нужно для интервала (Q_STEPS), но
   // и нельзя задвигать её ВПЕРЕДИ ещё не показанных в этой сессии слов —
@@ -4989,7 +4989,10 @@ function rateCurrent(kind) {
   const fc = $('#flashcard');
   const dir = kind === 'easy' ? 'swipe-right' : kind === 'hard' ? 'swipe-left' : 'swipe-up';
   fc.classList.add(dir);
-  reinsert(cardId, kind);
+  // "Легко" убирает слово из текущей сессии насовсем — "Трудно"/"Нормально"
+  // возвращают его в очередь, чтобы оно повторялось снова и снова, пока
+  // не будет отмечено как лёгкое.
+  if (kind !== 'easy') reinsert(cardId, kind);
   setTimeout(() => renderNextCard(), 260);
 }
 
