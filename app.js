@@ -6004,7 +6004,9 @@ async function handleAddWordsPhoto(e) {
       headers: { 'content-type': 'application/json' },
       body: JSON.stringify({ image: dataUrl }),
     });
-    const data = await res.json();
+    let data;
+    try { data = await res.json(); } catch { data = null; }
+    if (!data) { toast(`Сервер не поддерживает распознавание фото (код ${res.status}) — обнови воркер`); return; }
     if (data.error) { toast(data.error.message || 'Не удалось распознать'); return; }
     const text = data.content?.find(b => b.type === 'text')?.text?.trim();
     if (!text) { toast('Слов на фото не найдено'); return; }
