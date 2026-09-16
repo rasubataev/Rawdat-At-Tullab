@@ -4913,14 +4913,19 @@ function startDue() {
   startSession({ type: 'due', title: 'Повторение', words: due, backScreen: 's-learn' });
 }
 const Q_STEPS = { hard: 6, ok: 14 };
+// Не откладывай повтор дальше, чем на столько карточек вперёд, даже если в
+// юните/колоде ещё много непоказанных слов — иначе в больших юнитах (50-70+
+// слов) "трудное" слово, отмеченное рано, возвращается только в самом конце
+// сессии, а не "снова и снова" в разумном темпе.
+const REINSERT_DEFER_CAP = 15;
 function reinsert(cardId, kind) {
   // Карточку нельзя задвигать глубже, чем нужно для интервала (Q_STEPS), но
-  // и нельзя задвигать её ВПЕРЕДИ ещё не показанных в этой сессии слов —
-  // иначе в юнитах/колодах длиннее 40 слов "хвост" после 40-го слова
-  // никогда не доходит до начала очереди и сессия крутится по первым ~40.
+  // и нельзя задвигать её слишком далеко ВПЕРЕДИ ещё не показанных в этой
+  // сессии слов — иначе в юнитах/колодах длиннее 40 слов "хвост" никогда не
+  // доходит до начала очереди и сессия крутится по первым ~40.
   const desired = Q_STEPS[kind] || 10;
   const freshRemaining = session.queue.reduce((n, id) => n + (session.seen.has(id) ? 0 : 1), 0);
-  const pos = Math.min(session.queue.length, Math.max(desired, freshRemaining));
+  const pos = Math.min(session.queue.length, Math.max(desired, Math.min(freshRemaining, REINSERT_DEFER_CAP)));
   session.queue.splice(pos, 0, cardId);
 }
 
