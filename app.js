@@ -825,11 +825,10 @@ const BOOKS = [
               ['عيدُ الأَضْحى','Курбан-байрам'],
               ['عيدُ الفِطْر','Ураза-байрам'],
               ['غالٍ','дорогой'],
-              ['كُلّ','каждый / весь'],
+              ['كُلّ','каждый / весь / все'],
               ['فَريق','команда'],
               ['فُقَراء','бедные'],
               ['قالَ / يَقولُ','сказал / говорит'],
-              ['كُلّ','весь / все'],
               ['مَتاحِف','музеи'],
               ['مُحَرَّم','Мухаррам'],
               ['مَزْرَعَة','ферма'],
@@ -4915,7 +4914,13 @@ function startDue() {
 }
 const Q_STEPS = { hard: 6, ok: 14, easy: 40 };
 function reinsert(cardId, kind) {
-  const pos = Math.min(Q_STEPS[kind] || 10, session.queue.length);
+  // Карточку нельзя задвигать глубже, чем нужно для интервала (Q_STEPS), но
+  // и нельзя задвигать её ВПЕРЕДИ ещё не показанных в этой сессии слов —
+  // иначе в юнитах/колодах длиннее 40 слов "хвост" после 40-го слова
+  // никогда не доходит до начала очереди и сессия крутится по первым ~40.
+  const desired = Q_STEPS[kind] || 10;
+  const freshRemaining = session.queue.reduce((n, id) => n + (session.seen.has(id) ? 0 : 1), 0);
+  const pos = Math.min(session.queue.length, Math.max(desired, freshRemaining));
   session.queue.splice(pos, 0, cardId);
 }
 
