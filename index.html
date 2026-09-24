@@ -209,6 +209,7 @@
       Учить
     </button>
     <button type="button" class="btn btn-secondary" data-act="study-unit-due">Повторить</button>
+    <button type="button" class="btn btn-secondary" data-act="study-unit-quiz">Тест</button>
   </div>
 </div>
 
@@ -240,6 +241,7 @@
   <div class="count" id="study-count">0/0</div>
 </div>
 
+<div id="flash-ui">
 <div class="flashcard-wrap">
   <div class="flashcard" id="flashcard">
     <div class="fc-arabic" id="fc-arabic">--</div>
@@ -255,15 +257,15 @@
 <div class="rate-row" id="rate-row" style="visibility:hidden">
   <button type="button" class="rate-btn hard" data-rate="hard">
     <span class="rb-label">Трудно</span>
-   
+
   </button>
   <button type="button" class="rate-btn ok" data-rate="ok">
     <span class="rb-label">Нормально</span>
-   
+
   </button>
   <button type="button" class="rate-btn easy" data-rate="easy">
     <span class="rb-label">Легко</span>
-   
+
   </button>
 </div>
 
@@ -278,6 +280,12 @@
   <span>← Трудно</span>
   <span>↑ Нормально</span>
   <span>Легко →</span>
+</div>
+</div>
+
+<div id="quiz-ui" style="display:none;padding:0 16px">
+  <div class="quiz-word" id="quiz-word">--</div>
+  <div class="quiz-options" id="quiz-options"></div>
 </div>
 
   </section>
@@ -366,6 +374,9 @@
           <svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>
           Добавить
         </button>
+      </div>
+      <div class="btn-row" style="margin-top:10px">
+        <button type="button" class="btn btn-secondary" data-act="deck-quiz">Тест</button>
       </div>
     </div>
     <div id="deck-words" style="margin-top:12px"></div>
@@ -507,8 +518,30 @@
     <div class="kpi-detail">требуют внимания</div>
   </div>
 </div>
+
+<div class="section-head" style="padding-top:16px"><span class="eyebrow">Достижения</span></div>
+<div class="list-group">
+  <button type="button" class="list-item" data-act="open-achievements">
+    <div class="li-icon ico-brand" style="font-size:17px">🏆</div>
+    <div class="li-body"><div class="li-title">Достижения</div><div class="li-sub" id="ach-progress">0 из 0 открыто</div></div>
+    <div class="li-trail"><svg viewBox="0 0 24 24"><path d="M9 6l6 6-6 6"/></svg></div>
+  </button>
+</div>
 <div style="height:16px"></div>
 
+  </section>
+
+  <!-- ===================== ACHIEVEMENTS ===================== -->
+
+  <section id="s-achievements" class="screen hidden">
+    <div class="topbar">
+      <button type="button" class="icon-btn" data-back>
+        <svg viewBox="0 0 24 24"><path d="M15 6l-6 6 6 6"/></svg>
+      </button>
+      <span class="topbar-title">Достижения</span>
+      <div style="width:38px"></div>
+    </div>
+    <div id="achievements-list" style="padding:0 16px 20px"></div>
   </section>
 
   <!-- ===================== SETTINGS ===================== -->

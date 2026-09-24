@@ -4703,6 +4703,7 @@ function defaultState() {
     lastSession: null,
     lessonsRead: {},
     practiceDone: {},
+    achievements: {},
   };
 }
 
@@ -4884,15 +4885,15 @@ const findPart = (bookId, partId) => {
 
 /* ===== SESSION ================================================== */
 const session = {
-  active: false, type: null, title: '', backScreen: 's-home',
+  active: false, type: null, title: '', backScreen: 's-home', mode: 'flash',
   queue: [], seen: new Set(), current: null, revealed: false,
   stats: { reviewed: 0, correct: 0, newLearned: 0, startMs: 0, cardStartMs: 0 },
   plannedCount: 0,
 };
 
-function startSession({ type, title, words, backScreen = 's-home' }) {
+function startSession({ type, title, words, backScreen = 's-home', mode = 'flash' }) {
   if (!words || !words.length) { toast('Нет слов для сессии'); return; }
-  session.active = true; session.type = type; session.title = title; session.backScreen = backScreen;
+  session.active = true; session.type = type; session.title = title; session.backScreen = backScreen; session.mode = mode;
   const ids = words.map(w => ensureCard(w.ar, w.ru || '').id);
  session.queue = type === 'unit' ? ids : shuffle(ids);
   session.seen = new Set(); session.current = null; session.revealed = false;
@@ -4900,6 +4901,8 @@ function startSession({ type, title, words, backScreen = 's-home' }) {
   session.plannedCount = ids.length;
   STATE.lastSession = { type, title, backScreen };
   saveState();
+  $('#flash-ui').style.display = mode === 'quiz' ? 'none' : '';
+  $('#quiz-ui').style.display = mode === 'quiz' ? '' : 'none';
   navigate('s-study');
   renderStudyHeader();
   renderNextCard();
@@ -4930,21 +4933,69 @@ function reinsert(cardId, kind) {
 }
 
 function renderNextCard() {
-  const fc = $('#flashcard');
-  fc.classList.remove('revealed');
-  $('#rate-row').style.visibility = 'hidden';
-  $('#flip-btn').style.display = '';
   if (!session.queue.length) { finishSession(); return; }
   session.current = session.queue.shift();
   const c = STATE.cards[session.current]; if (!c) { renderNextCard(); return; }
   session.revealed = false; session.stats.cardStartMs = now();
   session.seen.add(c.id);
+  renderStudyHeader(); updateFavIcon();
+
+  if (session.mode === 'quiz') { renderQuizCard(c); return; }
+
+  const fc = $('#flashcard');
+  fc.classList.remove('revealed');
+  $('#rate-row').style.visibility = 'hidden';
+  $('#flip-btn').style.display = '';
   $('#fc-arabic').textContent = c.ar || '--';
   $('#fc-translation').textContent = c.ru || '--';
   fc.classList.remove('swipe-left','swipe-right','swipe-up','enter');
   void fc.offsetWidth;
   fc.classList.add('enter');
-  renderStudyHeader(); updateFavIcon(); updateRatePreview();
+  updateRatePreview();
+}
+
+/* ===== QUIZ (тест с вариантами ответов) =========================== */
+let QUIZ_OPTIONS = [];
+let QUIZ_ANSWERED = false;
+
+function pickQuizOptions(correctAr, correctRu) {
+  const correct = (correctRu || '').trim();
+  const pool = allWords().filter(w => w.ar !== correctAr && (w.ru || '').trim() && (w.ru || '').trim().toLowerCase() !== correct.toLowerCase());
+  const used = new Set([correct.toLowerCase()]);
+  const distractors = [];
+  shuffle(pool).forEach(w => {
+    if (distractors.length >= 3) return;
+    const ru = w.ru.trim();
+    const key = ru.toLowerCase();
+    if (used.has(key)) return;
+    used.add(key);
+    distractors.push(ru);
+  });
+  return shuffle([correct, ...distractors]);
+}
+
+function renderQuizCard(c) {
+  QUIZ_ANSWERED = false;
+  QUIZ_OPTIONS = pickQuizOptions(c.ar, c.ru);
+  $('#quiz-word').textContent = c.ar || '--';
+  $('#quiz-options').innerHTML = QUIZ_OPTIONS.map((opt, i) => `
+    <button type="button" class="quiz-option" data-act="quiz-answer" data-idx="${i}">${esc(opt)}</button>
+  `).join('');
+}
+
+function answerQuiz(idx) {
+  if (QUIZ_ANSWERED || !session.current) return;
+  QUIZ_ANSWERED = true;
+  const c = STATE.cards[session.current];
+  const correctRu = (c.ru || '').trim().toLowerCase();
+  const isCorrect = (QUIZ_OPTIONS[idx] || '').trim().toLowerCase() === correctRu;
+  $$('#quiz-options .quiz-option').forEach((btn, i) => {
+    btn.disabled = true;
+    if ((QUIZ_OPTIONS[i] || '').trim().toLowerCase() === correctRu) btn.classList.add('correct');
+    else if (i === idx) btn.classList.add('wrong');
+  });
+  applyRating(isCorrect ? 'ok' : 'hard');
+  setTimeout(() => renderNextCard(), isCorrect ? 550 : 1100);
 }
 
 function renderStudyHeader() {
@@ -4979,9 +5030,9 @@ function revealCard() {
   $('#flip-btn').style.display = 'none';
 }
 
-function rateCurrent(kind) {
-  if (!session.current) return;
-  if (!session.revealed) { revealCard(); return; }
+// Общая для флеш-карточек и теста бухгалтерия: обновляет карточку по SM-2,
+// статистику сессии и дня, возвращает/не возвращает слово в очередь сессии.
+function applyRating(kind) {
   const c = STATE.cards[session.current];
   const cardId = session.current;
   const elapsed = now() - session.stats.cardStartMs;
@@ -4991,13 +5042,19 @@ function rateCurrent(kind) {
   if (kind !== 'hard') session.stats.correct += 1;
   if (wasNew && STATE.cards[cardId].flags.learned) session.stats.newLearned += 1;
   bumpDay(1, kind !== 'hard' ? 1 : 0, (wasNew && STATE.cards[cardId].flags.learned) ? 1 : 0, elapsed);
-  const fc = $('#flashcard');
-  const dir = kind === 'easy' ? 'swipe-right' : kind === 'hard' ? 'swipe-left' : 'swipe-up';
-  fc.classList.add(dir);
   // "Легко" убирает слово из текущей сессии насовсем — "Трудно"/"Нормально"
   // возвращают его в очередь, чтобы оно повторялось снова и снова, пока
   // не будет отмечено как лёгкое.
   if (kind !== 'easy') reinsert(cardId, kind);
+}
+
+function rateCurrent(kind) {
+  if (!session.current) return;
+  if (!session.revealed) { revealCard(); return; }
+  applyRating(kind);
+  const fc = $('#flashcard');
+  const dir = kind === 'easy' ? 'swipe-right' : kind === 'hard' ? 'swipe-left' : 'swipe-up';
+  fc.classList.add(dir);
   setTimeout(() => renderNextCard(), 260);
 }
 
@@ -5010,6 +5067,11 @@ function finishSession() {
   $('#sum-reviewed').textContent = reviewed;
   $('#sum-time').textContent = mins + ' мин';
   $('#sum-new').textContent = newLearned;
+  if (session.mode === 'quiz' && reviewed >= 8 && correct === reviewed) {
+    STATE.hadPerfectQuiz = true;
+    saveState();
+  }
+  checkAchievements();
   navigate('s-summary');
 }
 
@@ -5054,7 +5116,7 @@ function navigate(screenId, { stack = true } = {}) {
     's-decks': 'learn', 's-deck': 'learn',
     's-hard': 'learn', 's-mix': 'learn', 's-search': 'learn', 's-pdf': 'learn', 's-links': 'learn',
     's-translate': 'learn', 's-irab': 'learn', 's-sarf': 'learn',
-    's-stats': 'stats', 's-settings': 'settings',
+    's-stats': 'stats', 's-achievements': 'stats', 's-settings': 'settings',
   };
   const tab = tabMap[screenId] || '';
   $$('.nav-btn').forEach(b => b.classList.toggle('active', b.dataset.tab === tab));
@@ -5090,6 +5152,7 @@ function runScreenRender(id) {
     case 's-mix': renderMix(); break;
     case 's-search': renderSearch(); break;
     case 's-stats': renderStats(); break;
+    case 's-achievements': renderAchievements(); break;
     case 's-settings': renderSettings(); break;
     case 's-lesson': renderLesson(); break;
     case 's-pdf': renderPdfReader(); break;
@@ -5745,13 +5808,49 @@ function stripHarakat(s) {
 }
 /* SEARCH */
 let SEARCH_Q = '', SEARCH_FILTER = 'all';
+
+// Фикх (Гаят ат-Такриб) — это вопрос/ответ, а не слово/перевод, поэтому он
+// намеренно не входит в allWords() (спутал бы обычные карточки и SRS), но
+// пользователь всё равно должен уметь найти нужный вопрос текстовым поиском.
+function searchFikh(qNorm, q) {
+  if (!q) return [];
+  const results = [];
+  const fikhBook = BOOKS.find(b => b.id === 'fikh');
+  if (!fikhBook) return results;
+  fikhBook.parts.forEach(part => {
+    (part.units || []).forEach(unit => {
+      (unit.words || []).forEach(([question, answer]) => {
+        const qn = stripHarakat(question || '').toLowerCase();
+        const an = stripHarakat(answer || '').toLowerCase();
+        if (qn.includes(qNorm) || an.includes(qNorm)) {
+          results.push({ unitId: unit.id, unitNum: unit.num, partTitle: part.title, question });
+        }
+      });
+    });
+  });
+  return results.slice(0, 50);
+}
+
+function fikhResultHTML(r) {
+  const qShort = r.question.length > 90 ? r.question.slice(0, 90) + '…' : r.question;
+  return `
+    <button type="button" class="list-item" data-act="open-unit" data-unit="${esc(r.unitId)}">
+      <div class="li-body">
+        <div class="li-title" style="font-family:var(--font-ar-classic);direction:rtl;text-align:right;font-size:15px;line-height:1.6">${esc(qShort)}</div>
+        <div class="li-sub">${esc(r.partTitle)} · вахьда ${r.unitNum}</div>
+      </div>
+      <div class="li-trail"><svg viewBox="0 0 24 24"><path d="M9 6l6 6-6 6"/></svg></div>
+    </button>
+  `;
+}
+
 function renderSearch() {
   $('#search-input').value = SEARCH_Q;
   $$('#s-search .seg').forEach(b => b.classList.toggle('on', b.dataset.sf === SEARCH_FILTER));
   const q = SEARCH_Q.trim().toLowerCase();
+  const qNorm = stripHarakat(q);
   const filtered = allWords().filter(w => {
     const arNorm = stripHarakat(w.ar || '').toLowerCase();
-const qNorm = stripHarakat(q);
 if (q && !arNorm.includes(qNorm) && !(w.ru || '').toLowerCase().includes(q)) return false;
     const c = STATE.cards[keyOf(w.ar)];
     if (SEARCH_FILTER === 'new') return !c || (c.reps || 0) === 0;
@@ -5759,12 +5858,21 @@ if (q && !arNorm.includes(qNorm) && !(w.ru || '').toLowerCase().includes(q)) ret
     if (SEARCH_FILTER === 'fav') return c && c.flags.fav;
     return true;
   }).slice(0, 200);
+  const fikhResults = SEARCH_FILTER === 'all' ? searchFikh(qNorm, q) : [];
   const list = $('#search-results');
-  if (!filtered.length) {
+  if (!filtered.length && !fikhResults.length) {
     list.innerHTML = `<div class="empty-state"><div class="es-icon"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3-3"/></svg></div><div class="es-title">Не найдено</div></div>`;
     return;
   }
-  list.innerHTML = `<div class="words-group">${filtered.map(w => wordRowHTML(w.ar, w.ru)).join('')}</div>`;
+  let html = '';
+  if (filtered.length) {
+    html += `<div class="words-group">${filtered.map(w => wordRowHTML(w.ar, w.ru)).join('')}</div>`;
+  }
+  if (fikhResults.length) {
+    html += `<div class="section-head" style="padding-top:16px"><span class="eyebrow">Фикх · ${fikhResults.length}</span></div>`;
+    html += `<div class="list-group">${fikhResults.map(fikhResultHTML).join('')}</div>`;
+  }
+  list.innerHTML = html;
 }
 
 /* STATS */
@@ -5802,6 +5910,58 @@ function renderStats() {
   $('#k-week-total').textContent = `${wk} за неделю`;
   $('#k-vocab').textContent = allWords().length;
   $('#k-hard-n').textContent = Object.values(STATE.cards).filter(c => c.flags.hard).length;
+  const achOpened = Object.keys(STATE.achievements || {}).length;
+  $('#ach-progress').textContent = `${achOpened} из ${ACHIEVEMENTS.length} открыто`;
+}
+
+/* ===== ACHIEVEMENTS ============================================= */
+function countLearnedWords() {
+  return Object.values(STATE.cards).filter(c => c.flags.learned).length;
+}
+
+const ACHIEVEMENTS = [
+  { id: 'first-word', icon: '🌱', title: 'Первые шаги', desc: 'Выучи первое слово', check: s => countLearnedWords() >= 1 },
+  { id: 'words-10', icon: '📘', title: '10 слов', desc: 'Выучи 10 слов', check: s => countLearnedWords() >= 10 },
+  { id: 'words-50', icon: '📗', title: '50 слов', desc: 'Выучи 50 слов', check: s => countLearnedWords() >= 50 },
+  { id: 'words-100', icon: '📙', title: '100 слов', desc: 'Выучи 100 слов', check: s => countLearnedWords() >= 100 },
+  { id: 'words-250', icon: '📕', title: '250 слов', desc: 'Выучи 250 слов', check: s => countLearnedWords() >= 250 },
+  { id: 'streak-3', icon: '🔥', title: 'Серия 3 дня', desc: 'Занимайся 3 дня подряд', check: s => (s.streak?.best || 0) >= 3 },
+  { id: 'streak-7', icon: '🔥', title: 'Серия 7 дней', desc: 'Занимайся неделю подряд', check: s => (s.streak?.best || 0) >= 7 },
+  { id: 'streak-30', icon: '🏅', title: 'Серия 30 дней', desc: 'Занимайся месяц подряд', check: s => (s.streak?.best || 0) >= 30 },
+  { id: 'reviews-500', icon: '🏃', title: 'Марафонец', desc: '500 повторений', check: s => (s.totals?.reviewed || 0) >= 500 },
+  { id: 'own-deck', icon: '🗂️', title: 'Своя колода', desc: 'Создай свою первую колоду', check: s => Object.keys(s.decks || {}).length >= 1 },
+  { id: 'quiz-perfect', icon: '🎯', title: 'Знаток теста', desc: 'Пройди тест из 8+ вопросов без единой ошибки', check: s => !!s.hadPerfectQuiz },
+];
+
+function checkAchievements(silent) {
+  if (!STATE.achievements) STATE.achievements = {};
+  const unlocked = [];
+  ACHIEVEMENTS.forEach(a => {
+    if (STATE.achievements[a.id]) return;
+    if (a.check(STATE)) {
+      STATE.achievements[a.id] = now();
+      unlocked.push(a);
+    }
+  });
+  if (unlocked.length) {
+    saveState();
+    if (!silent) unlocked.forEach(a => toast(`🏆 Достижение: ${a.title}`));
+  }
+}
+
+function renderAchievements() {
+  const opened = STATE.achievements || {};
+  $('#achievements-list').innerHTML = `<div class="ach-grid">${ACHIEVEMENTS.map(a => {
+    const unlockedAt = opened[a.id];
+    return `
+      <div class="ach-card ${unlockedAt ? 'unlocked' : 'locked'}">
+        <div class="ach-icon">${a.icon}</div>
+        <div class="ach-title">${esc(a.title)}</div>
+        <div class="ach-desc">${esc(a.desc)}</div>
+        ${unlockedAt ? `<div class="ach-date">${esc(new Date(unlockedAt).toLocaleDateString('ru-RU'))}</div>` : ''}
+      </div>
+    `;
+  }).join('')}</div>`;
 }
 
 /* SETTINGS */
@@ -6117,10 +6277,12 @@ document.addEventListener('click', e => {
     case 'toggle-fav': toggleFav(t.dataset.ar); break;
     case 'close-sheet': closeSheet(); break;
     case 'flip': revealCard(); break;
+    case 'quiz-answer': answerQuiz(parseInt(t.dataset.idx, 10)); break;
     case 'reset-data': resetData(); break;
     case 'coming-soon': toast('Скоро'); break;
     case 'go-books': navigate('s-books'); break;
 case 'go-search': navigate('s-search'); break;
+case 'open-achievements': navigate('s-achievements'); break;
 case 'open-mix': navigate('s-mix'); break;
 case 'open-decks': navigate('s-decks'); break;
 case 'open-links': navigate('s-links'); break;
@@ -6212,7 +6374,7 @@ case 'pr-reset': {
       if (!v) { toast('Введи название'); return; }
       const id = 'd_' + Math.random().toString(36).slice(2, 9);
       STATE.decks[id] = { id, name: v, createdAt: now(), words: [] };
-      saveState(); closeSheet(); renderDecks(); toast('Колода создана'); break;
+      saveState(); closeSheet(); renderDecks(); toast('Колода создана'); checkAchievements(); break;
     }
     case 'save-deck-name': {
       const id = t.dataset.id, v = $('#ed-name')?.value?.trim();
@@ -6341,6 +6503,12 @@ case 'pr-reset': {
       if (!words.length) { toast('Ничего не требует повтора'); return; }
       startSession({ type: 'unit', title: `Повтор · Вахьда ${f.unit.num}`, words, backScreen: 's-unit' }); break;
     }
+    case 'study-unit-quiz': {
+      const f = findUnit(UNIT_ID); if (!f) return;
+      const words = f.unit.words.map(w => ({ ar: w[0], ru: w[1] }));
+      if (words.length < 4) { toast('Нужно минимум 4 слова для теста'); return; }
+      startSession({ type: 'quiz', title: `Тест · Вахьда ${f.unit.num}`, words, backScreen: 's-unit', mode: 'quiz' }); break;
+    }
     case 'study-hard': {
       const words = Object.values(STATE.cards).filter(c => c.flags.hard).map(c => ({ ar: c.ar, ru: c.ru }));
       if (!words.length) { toast('Трудных слов нет'); return; }
@@ -6349,6 +6517,11 @@ case 'pr-reset': {
     case 'deck-study': {
       const d = STATE.decks[DECK_ID]; if (!d?.words.length) { toast('Колода пуста'); return; }
       startSession({ type: 'deck', title: d.name, words: d.words.map(w => ({ ar: w.ar, ru: w.ru })), backScreen: 's-deck' }); break;
+    }
+    case 'deck-quiz': {
+      const d = STATE.decks[DECK_ID]; if (!d?.words.length) { toast('Колода пуста'); return; }
+      if (d.words.length < 4) { toast('Нужно минимум 4 слова для теста'); return; }
+      startSession({ type: 'quiz', title: `Тест · ${d.name}`, words: d.words.map(w => ({ ar: w.ar, ru: w.ru })), backScreen: 's-deck', mode: 'quiz' }); break;
     }
     case 'mix-start': {
       const words = collectMix();
@@ -10242,6 +10415,7 @@ function renderLesson() {
 
 applyTheme(STATE.settings?.theme || 'dark');
 navigate('s-home', { stack: false });
+checkAchievements(true);
 checkDueNotify();
 setInterval(() => checkDueNotify(), 10 * 60 * 1000);
 document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible') checkDueNotify(); });
