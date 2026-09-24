@@ -4737,7 +4737,6 @@ const saveStateSync = (s = STATE) => {
   try { localStorage.setItem(SK, JSON.stringify(s)); } catch(e) {}
 };
 
-const IS_FIRST_LAUNCH = !localStorage.getItem(SK);
 STATE = loadState();
 
 function ensureCard(ar, ru) {
@@ -5164,8 +5163,6 @@ function runScreenRender(id) {
 
 /* HOME */
 function renderHome() {
-  const bannerEl = $('#support-banner');
-  if (bannerEl) bannerEl.style.display = STATE.settings?.supportBannerDismissed ? 'none' : '';
   const hour = new Date().getHours();
   const greet = hour < 5 ? 'Доброй ночи' : hour < 12 ? 'Доброе утро' : hour < 17 ? 'Добрый день' : 'Добрый вечер';
   $('#hero-greeting').textContent = greet + '!';
@@ -6277,12 +6274,6 @@ document.addEventListener('click', e => {
     case 'open-unit': openUnit(t.dataset.unit); break;
     case 'open-deck': openDeck(t.dataset.deck); break;
     case 'toggle-theme': toggleTheme(); break;
-    case 'dismiss-support-banner': {
-      STATE.settings.supportBannerDismissed = true;
-      saveState();
-      const el = $('#support-banner'); if (el) el.style.display = 'none';
-      break;
-    }
     case 'toggle-fav': toggleFav(t.dataset.ar); break;
     case 'close-sheet': closeSheet(); break;
     case 'flip': revealCard(); break;
@@ -10429,16 +10420,6 @@ checkDueNotify();
 setInterval(() => checkDueNotify(), 10 * 60 * 1000);
 document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible') checkDueNotify(); });
 
-// Приветственное напоминание о поддержке — только при самом первом запуске
-// (до этого в браузере вообще не было сохранённого прогресса), с задержкой,
-// чтобы не соревноваться с начальной отрисовкой экрана.
-if (IS_FIRST_LAUNCH) {
-  setTimeout(() => {
-    if (FEATURE_FLAGS.donate === false) return;
-    toast('Поддержи проект, чтобы он вышел в App Store и Google Play 🤍', 4500);
-  }, 1800);
-}
-
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => {
     navigator.serviceWorker.register('/sw.js').catch(e => console.error('SW registration failed', e));
@@ -10467,7 +10448,6 @@ let FEATURE_FLAGS = {};
       if (FEATURE_FLAGS.donate === false) {
         document.getElementById('donate-section-head')?.style.setProperty('display', 'none');
         document.getElementById('donate-section')?.style.setProperty('display', 'none');
-        document.getElementById('support-banner')?.style.setProperty('display', 'none');
       }
     })
     .catch(() => {});
