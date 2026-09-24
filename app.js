@@ -5841,7 +5841,7 @@ function versionTap() {
   VERSION_TAPS++;
   if (VERSION_TAPS >= 7) {
     VERSION_TAPS = 0;
-    window.open('admin.html', '_blank');
+    location.href = 'admin.html';
     return;
   }
   VERSION_TAP_T = setTimeout(() => { VERSION_TAPS = 0; }, 2500);

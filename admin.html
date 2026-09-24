@@ -45,11 +45,17 @@
   .links-empty{font-size:12.5px;color:var(--text-3);font-style:italic;padding:8px 0}
   #gate{max-width:340px;margin:20vh auto 0;padding:0 20px;text-align:center}
   #gate h1{font-size:18px;margin-bottom:16px}
+  .admin-back{display:inline-flex;align-items:center;gap:6px;font-size:13px;font-weight:600;color:var(--text-2);text-decoration:none;margin-bottom:18px}
+  .admin-back svg{width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
 </style>
 </head>
 <body>
 
 <div id="gate">
+  <a class="admin-back" href="index.html" style="justify-content:center">
+    <svg viewBox="0 0 24 24"><path d="M15 6l-6 6 6 6"/></svg>
+    В приложение
+  </a>
   <h1>Админ-панель Rawdat At-Tullab</h1>
   <div class="admin-field"><input type="text" id="gate-key" placeholder="Секретный ключ (STATS_ADMIN_KEY)" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false"></div>
   <button type="button" class="btn btn-primary" style="width:100%" onclick="unlock()">Войти</button>
@@ -57,6 +63,10 @@
 </div>
 
 <div class="admin-wrap" id="panel" style="display:none">
+  <a class="admin-back" href="index.html">
+    <svg viewBox="0 0 24 24"><path d="M15 6l-6 6 6 6"/></svg>
+    В приложение
+  </a>
   <h1>Админ-панель</h1>
 
   <div class="admin-card">
