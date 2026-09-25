@@ -6588,11 +6588,6 @@ case 'pr-reset': {
       if (!d) break;
       d.words.splice(idx, 1); saveState(); closeSheet(); renderDeck(); toast('Удалено'); break;
     }
-    case 'start-review': {
-      const due = Object.values(STATE.cards).filter(c => (c.due || 0) <= now());
-      if (!due.length) { toast('Ничего не требует повтора'); return; }
-      startSession({ type: 'due', title: 'Повторение', words: due.map(c => ({ ar: c.ar, ru: c.ru })), backScreen: 's-home' }); break;
-    }
     case 'start-new': {
       const newW = allWords().filter(w => { const c = STATE.cards[keyOf(w.ar)]; return !c || (c.reps || 0) === 0; });
       if (!newW.length) { toast('Нет новых слов'); return; }
@@ -10349,10 +10344,6 @@ let LESSON_ID = null;
 
 function openLesson(partId) {
   LESSON_ID = partId;
-  navigate('s-lesson');
-}
-function openLesson(partId) {
-  LESSON_ID = partId;
   if (!STATE.lessonsRead) STATE.lessonsRead = {};
   STATE.lessonsRead[partId] = now();
   markActivity();
@@ -10439,7 +10430,6 @@ function renderPractice() {
 
 function renderLesson() {
   const lesson = LESSONS[LESSON_ID];
-  console.log("LESSON_ID =", LESSON_ID, lesson?.title);
   if (!lesson) {
     $('#lesson-body').innerHTML = `<div class="empty-state"><div class="es-title">Скоро</div><div class="es-text">Урок в разработке</div></div>`;
     $('#lesson-title').textContent = 'Урок';
