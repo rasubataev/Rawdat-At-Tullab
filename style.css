@@ -3,7 +3,7 @@
    Dark glass redesign: deep black + emerald glow + glassmorphism
    ================================================================ */
 
-@import url('https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800;900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800;900&family=Noto+Naskh+Arabic:wght@400;500;600;700&family=Golos+Text:wght@400;500;600;700;800;900&display=swap');
 
 /* ============================================================
    DESIGN TOKENS — DARK GLASS DEFAULT
@@ -80,10 +80,10 @@
   --dur-4: 520ms;
 
   /* Typography — unchanged, per instruction */
-  --font-ui: -apple-system, BlinkMacSystemFont, "SF Pro Text", system-ui, "Segoe UI", Roboto, sans-serif;
-  --font-display: -apple-system, BlinkMacSystemFont, "SF Pro Display", system-ui, "Segoe UI", Roboto, sans-serif;
+  --font-ui: "Golos Text", -apple-system, BlinkMacSystemFont, "SF Pro Text", system-ui, "Segoe UI", Roboto, sans-serif;
+  --font-display: "Golos Text", -apple-system, BlinkMacSystemFont, "SF Pro Display", system-ui, "Segoe UI", Roboto, sans-serif;
   --font-ar: "Tajawal", "SF Arabic", "Noto Naskh Arabic", "Amiri", serif;
-  --font-ar-classic: -apple-system, BlinkMacSystemFont, "SF Pro Text", system-ui, "Segoe UI", Roboto, sans-serif;
+  --font-ar-classic: "Noto Naskh Arabic", "Amiri", "SF Arabic", "Tajawal", serif;
   --font-mono: "SF Mono", "Fira Code", monospace;
 
   /* Safe areas */
@@ -1689,7 +1689,7 @@
     font-weight: 500;
     letter-spacing: 0;
     transition: color var(--dur-2);
-    font-family: -apple-system, "SF Pro Text", system-ui, sans-serif;
+    font-family: var(--font-ui);
   }
 
   .nav-btn.active {
